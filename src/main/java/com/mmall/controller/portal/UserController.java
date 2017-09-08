@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import javax.servlet.http.HttpSession;
+import javax.xml.ws.Response;
 
 @Controller
 @RequestMapping("/user/")
@@ -73,5 +74,20 @@ public class UserController {
     @ResponseBody
     public ServiceResponse<String> checkValid(String str, String type) {
         return iUserService.checkValid(str, type);
+    }
+
+    /**
+     * 获取登录的用户信息
+     * @param session
+     * @return
+     */
+    @RequestMapping(value = "get_user_info.do", method = RequestMethod.GET)
+    @ResponseBody
+    public ServiceResponse<User> getUserInfo(HttpSession session){
+        User user = ((User) session.getAttribute(Const.CURRENT_USER));
+        if (user != null){
+            return ServiceResponse.createBySuccess(user);
+        }
+        return ServiceResponse.createByErrorMessage("用户未登录，不能获取用户信息");
     }
 }
