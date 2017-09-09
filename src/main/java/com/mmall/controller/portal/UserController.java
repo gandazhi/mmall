@@ -90,4 +90,29 @@ public class UserController {
         }
         return ServiceResponse.createByErrorMessage("用户未登录，不能获取用户信息");
     }
+
+    /**
+     * 获取用户忘记密码重置密码问题
+     * @param username 用户名
+     * @return
+     */
+    @RequestMapping(value = "forget_get_question.do", method = RequestMethod.GET)
+    @ResponseBody
+    public ServiceResponse<String> forgetGetQuestion(String username){
+        return iUserService.selectQuestion(username);
+    }
+
+    /**
+     * 验证用户提交的问题答案是否与设置的密码一致
+     * @param username  用户名
+     * @param question  设置的找回密码问题
+     * @param answer    设置的找回密码问题的答案
+     * @return
+     */
+    @RequestMapping(value = "for_get_checkAnswer.do", method = RequestMethod.GET)
+    @ResponseBody
+    public ServiceResponse<String> forgetCheckAnswer(String username, String question, String answer){
+        return iUserService.checkAnswer(username, question, answer);
+    }
+
 }

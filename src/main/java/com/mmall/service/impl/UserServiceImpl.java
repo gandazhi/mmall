@@ -2,6 +2,7 @@ package com.mmall.service.impl;
 
 import com.mmall.common.Const;
 import com.mmall.common.ServiceResponse;
+import com.mmall.common.TokenCache;
 import com.mmall.dao.UserMapper;
 import com.mmall.pojo.User;
 import com.mmall.service.IUserService;
@@ -9,6 +10,8 @@ import com.mmall.util.MD5Util;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import java.util.UUID;
 
 @Service("iUserService")
 public class UserServiceImpl implements IUserService {
@@ -36,11 +39,11 @@ public class UserServiceImpl implements IUserService {
 
     public ServiceResponse<String> register(User user) {
         ServiceResponse validResponse = this.checkValid(user.getUsername(), Const.USERNAME);
-        if (!validResponse.isSuccess()){
+        if (!validResponse.isSuccess()) {
             return ServiceResponse.createByErrorMessage("用户名已经存在");
         }
         validResponse = this.checkValid(user.getEmail(), Const.EMAIL);
-        if (!validResponse.isSuccess()){
+        if (!validResponse.isSuccess()) {
             return ServiceResponse.createByErrorMessage("邮箱已经存在");
         }
 
@@ -56,7 +59,7 @@ public class UserServiceImpl implements IUserService {
     @Override
     public ServiceResponse<String> checkValid(String str, String type) {
         if (org.apache.commons.lang3.StringUtils.isNotBlank(str)) { //判断str是否为空
-            //开始校验用户名或邮箱是否存在
+            //开始校验用户名或邮箱是否存在User
             if (Const.USERNAME.equals(type)) {
                 int resultCount = userMapper.checkUsername(str);
                 if (resultCount > 0) {
@@ -73,5 +76,30 @@ public class UserServiceImpl implements IUserService {
             return ServiceResponse.createByErrorMessage("参数错误");
         }
         return ServiceResponse.createBySuccessMesage("校验成功");
+    }
+
+    @Override
+    public ServiceResponse selectQuestion(String username) {
+        //先校验传来的username是否存在
+        ServiceResponse validResponse = this.checkValid(username, Const.USERNAME);
+        if (validResponse.isSuccess()) {
+            return ServiceResponse.createByErrorMessage("用户不存在");
+        }
+        String question = userMapper.selectQuestionByUsername(username);
+        if (org.apache.commons.lang3.StringUtils.isNotBlank(question)) {
+            return ServiceResponse.createBySuccess(question);
+        }
+        return ServiceResponse.createByErrorMessage("找回密码的问题是空的");
+    }
+
+    @Override
+    public ServiceResponse<String> checkAnswer(String username, String question, String password) {
+        int resultCount = userMapper.checkAnswer(username, question, password);
+        if (resultCount > 0) {
+            String forgetToken = UUID.randomUUID().toString();
+            TokenCache.setKey("token_" + username, forgetToken);
+            return ServiceResponse.createBySuccess(forgetToken);
+        }
+        return ServiceResponse.createByErrorMessage("密码验证失败");
     }
 }
