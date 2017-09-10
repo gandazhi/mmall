@@ -127,4 +127,48 @@ public class UserServiceImpl implements IUserService {
         }
         return ServiceResponse.createByErrorMessage("修改密码失败");
     }
+
+    @Override
+    public ServiceResponse<String> resetPassword(String oldPassword, String newPassword, User user) {
+        int resultCount = userMapper.checkPassword(user.getId(), MD5Util.MD5EncodeUtf8(oldPassword));
+        if (resultCount == 0){
+            return ServiceResponse.createByErrorMessage("旧密码错误");
+        }
+        user.setPassword(MD5Util.MD5EncodeUtf8(newPassword));
+        resultCount = userMapper.updateByPrimaryKeySelective(user);
+        if (resultCount > 0){
+            return ServiceResponse.createBySuccessMesage("密码修改成功");
+        }
+        return ServiceResponse.createByErrorMessage("密码修改失败");
+    }
+
+    @Override
+    public ServiceResponse<User> updateInformation(User user) {
+        //先判断email是不是被其他用户占用了
+        int resultCount = userMapper.checkEmailByUserId(user.getId(), user.getEmail());
+        if (resultCount > 0){
+            return ServiceResponse.createByErrorMessage("该email已经被其他人注册了，请换个邮箱");
+        }
+        User updateUser = new User();
+        updateUser.setUsername(user.getUsername());
+        updateUser.setEmail(user.getEmail());
+        updateUser.setQuestion(user.getQuestion());
+        updateUser.setAnswer(user.getAnswer());
+
+        resultCount = userMapper.updateByPrimaryKeySelective(updateUser);
+        if (resultCount > 0){
+            return ServiceResponse.createBySuccess("更新信息成功", updateUser);
+        }
+        return ServiceResponse.createByErrorMessage("更新信息失败");
+    }
+
+    @Override
+    public ServiceResponse<User> getInformation(Integer userId) {
+        User user = userMapper.selectByPrimaryKey(userId);
+        if (user == null){
+            return ServiceResponse.createByErrorMessage("用户不存在");
+        }
+        user.setPassword(StringUtils.EMPTY);
+        return ServiceResponse.createBySuccess(user);
+    }
 }
