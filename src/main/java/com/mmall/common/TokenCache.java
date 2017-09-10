@@ -11,6 +11,7 @@ import java.util.concurrent.TimeUnit;
 public class TokenCache {
 
     private static Logger logger = LoggerFactory.getLogger(TokenCache.class);
+    public static final String TOKEN_PREFIX = "token_";
 
     //初始话缓存，1000是初始化的时候设置的缓存容量,10000是最大缓存的容量，如果超过最大容量，启动LRU算法，12小时是最大的缓存时间
     private static LoadingCache<String, String> localCache = CacheBuilder.newBuilder().initialCapacity(1000)

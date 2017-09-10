@@ -96,10 +96,35 @@ public class UserServiceImpl implements IUserService {
     public ServiceResponse<String> checkAnswer(String username, String question, String password) {
         int resultCount = userMapper.checkAnswer(username, question, password);
         if (resultCount > 0) {
-            String forgetToken = UUID.randomUUID().toString();
+            String forgetToken = UUID.randomUUID().toString(); //生成一个不可重复的字符串
             TokenCache.setKey("token_" + username, forgetToken);
             return ServiceResponse.createBySuccess(forgetToken);
         }
         return ServiceResponse.createByErrorMessage("密码验证失败");
+    }
+
+    @Override
+    public ServiceResponse<String> forgetRestPassword(String username, String newPassword, String forgetToken) {
+        if (StringUtils.isBlank(forgetToken)){
+            return ServiceResponse.createByErrorMessage("token需要重新获取");
+        }
+        ServiceResponse checkUsername = this.checkValid(username, Const.USERNAME);
+        if (checkUsername.isSuccess()){
+            return ServiceResponse.createByErrorMessage("用户不存在");
+        }
+        String token = TokenCache.getKey(TokenCache.TOKEN_PREFIX+username);
+        if (StringUtils.isBlank(token)){
+            return ServiceResponse.createByErrorMessage("token无效");
+        }
+        if (StringUtils.equals(token,forgetToken)){
+            String md5Password = MD5Util.MD5EncodeUtf8(newPassword);
+            int resultCount = userMapper.updatePassword(username, md5Password);
+            if (resultCount > 0){
+                return ServiceResponse.createBySuccessMesage("修改密码成功");
+            }
+        }else {
+            return ServiceResponse.createByErrorMessage("token错误,重新获取重置密码token");
+        }
+        return ServiceResponse.createByErrorMessage("修改密码失败");
     }
 }

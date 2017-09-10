@@ -181,4 +181,10 @@
     and question = #{question}
     and answer = #{answer}
   </select>
+
+  <update id="updatePassword" parameterType="map">
+     UPDATE mmall_user
+     SET password = #{newPassword}, update_time = now
+     WHERE username = #{username}
+  </update>
 </mapper>

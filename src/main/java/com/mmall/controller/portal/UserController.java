@@ -115,4 +115,16 @@ public class UserController {
         return iUserService.checkAnswer(username, question, answer);
     }
 
+    /**
+     * 没有登录的情况下，使用验证用户设置的找回密码问题来重置密码
+     * @param username 用户名
+     * @param newPassword 新密码
+     * @param forgetToken 验证找回密码问题通过后的token
+     * @return
+     */
+    @RequestMapping(value = "forget_reset_password", method = RequestMethod.GET)
+    @ResponseBody
+    public ServiceResponse<String> forgetResetPassword(String username, String newPassword, String forgetToken){
+        return iUserService.forgetRestPassword(username, newPassword, forgetToken);
+    }
 }
