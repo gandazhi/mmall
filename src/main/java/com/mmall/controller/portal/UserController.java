@@ -23,7 +23,6 @@ public class UserController {
 
     @Autowired
     private IUserService iUserService;
-    private UserServiceImpl userService;
 
     /**
      * 用户登录

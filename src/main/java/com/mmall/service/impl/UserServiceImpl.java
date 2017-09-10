@@ -66,11 +66,13 @@ public class UserServiceImpl implements IUserService {
                     return ServiceResponse.createByErrorMessage("用户名已经存在");
                 }
             }
-            if (Const.EMAIL.equals(type)) {
+            else if (Const.EMAIL.equals(type)) {
                 int resultCount = userMapper.checkEmail(str);
                 if (resultCount > 0) {
                     return ServiceResponse.createByErrorMessage("邮箱已经存在");
                 }
+            }else {
+                return ServiceResponse.createByErrorMessage("type错误");
             }
         } else {
             return ServiceResponse.createByErrorMessage("参数错误");
