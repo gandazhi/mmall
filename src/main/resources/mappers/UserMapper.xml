@@ -199,4 +199,5 @@
     WHERE email = #{email}
     and id != #{userId}
   </select>
+  
 </mapper>
