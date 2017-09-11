@@ -27,9 +27,9 @@ public class UserController {
     /**
      * 用户登录
      *
-     * @param username
-     * @param password
-     * @param session
+     * @param username 用户名
+     * @param password 密码
+     * @param session  登录成功后，将登录信息存入session中
      * @return
      */
     @RequestMapping(value = "login.do", method = RequestMethod.POST)
