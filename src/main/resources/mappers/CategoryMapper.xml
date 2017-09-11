@@ -116,4 +116,10 @@
       update_time = now()
     where id = #{id,jdbcType=INTEGER}
   </update>
+
+  <select id="checkCategoryName" resultType="int" parameterType="map">
+    SELECT COUNT(1) FROM mmall_category
+    WHERE parent_id = #{parentId}
+    and name = #{categoryName}
+  </select>
 </mapper>

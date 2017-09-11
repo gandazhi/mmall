@@ -20,12 +20,19 @@ public class CategoryServiceImpl implements ICategoryService {
         if (parentId == null || StringUtils.isBlank(categoryName)) {
             return ServiceResponse.createByErrorMessage("参数错误");
         }
+
+        //判断更新的分类名在该节点下是否重名
+        int resultCount = categoryMapper.checkCategoryName(categoryName, parentId);
+        if (resultCount > 0){
+            return ServiceResponse.createByErrorMessage("该节点下已有这个分类名，请更换分类名");
+        }
+
         Category category = new Category();
         category.setParentId(parentId);
         category.setName(categoryName);
         category.setStatus(true);//默认新建的分类是可用状态
 
-        int resultCount = categoryMapper.insert(category);
+        resultCount = categoryMapper.insert(category);
         if (resultCount > 0){
             return ServiceResponse.createBySuccessMesage("新建分类成功");
         }
@@ -38,11 +45,18 @@ public class CategoryServiceImpl implements ICategoryService {
         if (categoryId == null || StringUtils.isBlank(newCategoryName)){
             return ServiceResponse.createByErrorMessage("参数错误");
         }
+
+        //判断更新的分类名在该节点下是否重名
+        int resultCount = categoryMapper.checkCategoryName(newCategoryName, categoryId);
+        if (resultCount > 0){
+            return ServiceResponse.createByErrorMessage("该节点下已有这个分类名，请更换分类名");
+        }
+
         Category category = new Category();
         category.setId(categoryId);
         category.setName(newCategoryName);
 
-        int resultCount = categoryMapper.updateByPrimaryKeySelective(category);
+        resultCount = categoryMapper.updateByPrimaryKeySelective(category);
         if (resultCount > 0){
             return ServiceResponse.createBySuccess("更新分类名成功");
         }
