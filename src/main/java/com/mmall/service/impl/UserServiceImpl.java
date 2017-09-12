@@ -104,6 +104,10 @@ public class UserServiceImpl implements IUserService {
 
     @Override
     public ServiceResponse selectQuestion(String username) {
+        //判断username是不是为空
+        if (StringUtils.isBlank(username)){
+            return ServiceResponse.createByErrorMessage("username不能为空");
+        }
         //先校验传来的username是否存在
         ServiceResponse validResponse = this.checkValid(username, Const.USERNAME);
         if (validResponse.isSuccess()) {
