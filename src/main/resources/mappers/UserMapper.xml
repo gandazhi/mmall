@@ -199,5 +199,9 @@
     WHERE email = #{email}
     and id != #{userId}
   </select>
-  
+
+  <select id="checkPhone" resultType="int" parameterType="string">
+    SELECT COUNT(1) FROM mmall_user
+    WHERE phone = #{phone}
+  </select>
 </mapper>

@@ -7,6 +7,7 @@ import com.mmall.dao.UserMapper;
 import com.mmall.pojo.User;
 import com.mmall.service.IUserService;
 import com.mmall.util.MD5Util;
+import com.mmall.util.RegularExpressionUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -46,7 +47,18 @@ public class UserServiceImpl implements IUserService {
         if (!validResponse.isSuccess()) {
             return ServiceResponse.createByErrorMessage("邮箱已经存在");
         }
-
+        //验证邮箱账号是否合法
+        if (!RegularExpressionUtil.isEmail(user.getEmail())){
+            return ServiceResponse.createByErrorMessage("邮箱账号不合法");
+        }
+        validResponse = this.checkValid(user.getPhone(), Const.PHONE);
+        if (!validResponse.isSuccess()){
+            return ServiceResponse.createByErrorMessage("手机号已经存在");
+        }
+        //验证手机账号是否合法
+        if (!RegularExpressionUtil.isPhone(user.getPhone())){
+            return ServiceResponse.createByErrorMessage("手机号不合法");
+        }
         user.setRole(Const.Role.ROLE_CUSTOMER);
         user.setPassword(MD5Util.MD5EncodeUtf8(user.getPassword()));
         int resultCount = userMapper.insert(user);
@@ -70,6 +82,11 @@ public class UserServiceImpl implements IUserService {
                 int resultCount = userMapper.checkEmail(str);
                 if (resultCount > 0) {
                     return ServiceResponse.createByErrorMessage("邮箱已经存在");
+                }
+            }else if (Const.PHONE.equals(type)){
+                int resultCount = userMapper.checkPhone(str);
+                if (resultCount > 0){
+                    return ServiceResponse.createByErrorMessage("这个手机号已经被注册了");
                 }
             }else {
                 return ServiceResponse.createByErrorMessage("type错误");
