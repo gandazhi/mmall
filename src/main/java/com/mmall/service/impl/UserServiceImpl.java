@@ -48,15 +48,15 @@ public class UserServiceImpl implements IUserService {
             return ServiceResponse.createByErrorMessage("邮箱已经存在");
         }
         //验证邮箱账号是否合法
-        if (!RegularExpressionUtil.isEmail(user.getEmail())){
+        if (!RegularExpressionUtil.isEmail(user.getEmail())) {
             return ServiceResponse.createByErrorMessage("邮箱账号不合法");
         }
         validResponse = this.checkValid(user.getPhone(), Const.PHONE);
-        if (!validResponse.isSuccess()){
+        if (!validResponse.isSuccess()) {
             return ServiceResponse.createByErrorMessage("手机号已经存在");
         }
         //验证手机账号是否合法
-        if (!RegularExpressionUtil.isPhone(user.getPhone())){
+        if (!RegularExpressionUtil.isPhone(user.getPhone())) {
             return ServiceResponse.createByErrorMessage("手机号不合法");
         }
         user.setRole(Const.Role.ROLE_CUSTOMER);
@@ -77,18 +77,23 @@ public class UserServiceImpl implements IUserService {
                 if (resultCount > 0) {
                     return ServiceResponse.createByErrorMessage("用户名已经存在");
                 }
-            }
-            else if (Const.EMAIL.equals(type)) {
+            } else if (Const.EMAIL.equals(type)) {
+                if (!RegularExpressionUtil.isEmail(str)) {
+                    return ServiceResponse.createByErrorMessage("邮箱不合法");
+                }
                 int resultCount = userMapper.checkEmail(str);
                 if (resultCount > 0) {
                     return ServiceResponse.createByErrorMessage("邮箱已经存在");
                 }
-            }else if (Const.PHONE.equals(type)){
+            } else if (Const.PHONE.equals(type)) {
+                if (!RegularExpressionUtil.isPhone(str)) {
+                    return ServiceResponse.createByErrorMessage("手机号不合法");
+                }
                 int resultCount = userMapper.checkPhone(str);
-                if (resultCount > 0){
+                if (resultCount > 0) {
                     return ServiceResponse.createByErrorMessage("这个手机号已经被注册了");
                 }
-            }else {
+            } else {
                 return ServiceResponse.createByErrorMessage("type错误");
             }
         } else {
@@ -124,24 +129,24 @@ public class UserServiceImpl implements IUserService {
 
     @Override
     public ServiceResponse<String> forgetRestPassword(String username, String newPassword, String forgetToken) {
-        if (StringUtils.isBlank(forgetToken)){
+        if (StringUtils.isBlank(forgetToken)) {
             return ServiceResponse.createByErrorMessage("token需要重新获取");
         }
         ServiceResponse checkUsername = this.checkValid(username, Const.USERNAME);
-        if (checkUsername.isSuccess()){
+        if (checkUsername.isSuccess()) {
             return ServiceResponse.createByErrorMessage("用户不存在");
         }
-        String token = TokenCache.getKey(TokenCache.TOKEN_PREFIX+username);
-        if (StringUtils.isBlank(token)){
+        String token = TokenCache.getKey(TokenCache.TOKEN_PREFIX + username);
+        if (StringUtils.isBlank(token)) {
             return ServiceResponse.createByErrorMessage("token无效");
         }
-        if (StringUtils.equals(token,forgetToken)){
+        if (StringUtils.equals(token, forgetToken)) {
             String md5Password = MD5Util.MD5EncodeUtf8(newPassword);
             int resultCount = userMapper.updatePassword(username, md5Password);
-            if (resultCount > 0){
+            if (resultCount > 0) {
                 return ServiceResponse.createBySuccessMesage("修改密码成功");
             }
-        }else {
+        } else {
             return ServiceResponse.createByErrorMessage("token错误,重新获取重置密码token");
         }
         return ServiceResponse.createByErrorMessage("修改密码失败");
@@ -150,12 +155,12 @@ public class UserServiceImpl implements IUserService {
     @Override
     public ServiceResponse<String> resetPassword(String oldPassword, String newPassword, User user) {
         int resultCount = userMapper.checkPassword(user.getId(), MD5Util.MD5EncodeUtf8(oldPassword));
-        if (resultCount == 0){
+        if (resultCount == 0) {
             return ServiceResponse.createByErrorMessage("旧密码错误");
         }
         user.setPassword(MD5Util.MD5EncodeUtf8(newPassword));
         resultCount = userMapper.updateByPrimaryKeySelective(user);
-        if (resultCount > 0){
+        if (resultCount > 0) {
             return ServiceResponse.createBySuccessMesage("密码修改成功");
         }
         return ServiceResponse.createByErrorMessage("密码修改失败");
@@ -165,7 +170,7 @@ public class UserServiceImpl implements IUserService {
     public ServiceResponse<User> updateInformation(User user) {
         //先判断email是不是被其他用户占用了
         int resultCount = userMapper.checkEmailByUserId(user.getId(), user.getEmail());
-        if (resultCount > 0){
+        if (resultCount > 0) {
             return ServiceResponse.createByErrorMessage("该email已经被其他人注册了，请换个邮箱");
         }
         User updateUser = new User();
@@ -175,7 +180,7 @@ public class UserServiceImpl implements IUserService {
         updateUser.setAnswer(user.getAnswer());
 
         resultCount = userMapper.updateByPrimaryKeySelective(updateUser);
-        if (resultCount > 0){
+        if (resultCount > 0) {
             return ServiceResponse.createBySuccess("更新信息成功", updateUser);
         }
         return ServiceResponse.createByErrorMessage("更新信息失败");
@@ -184,7 +189,7 @@ public class UserServiceImpl implements IUserService {
     @Override
     public ServiceResponse<User> getInformation(Integer userId) {
         User user = userMapper.selectByPrimaryKey(userId);
-        if (user == null){
+        if (user == null) {
             return ServiceResponse.createByErrorMessage("用户不存在");
         }
         user.setPassword(StringUtils.EMPTY);
@@ -193,7 +198,7 @@ public class UserServiceImpl implements IUserService {
 
     @Override
     public ServiceResponse checkAdminRole(User user) {
-        if (user != null && user.getRole().intValue() == Const.Role.ROLE_ADMIN){
+        if (user != null && user.getRole().intValue() == Const.Role.ROLE_ADMIN) {
             return ServiceResponse.createBySuccess();
         }
         return ServiceResponse.createByError();
