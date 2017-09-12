@@ -128,7 +128,7 @@ public class UserServiceImpl implements IUserService {
         int resultCount = userMapper.checkAnswer(username, question, answer);
         if (resultCount > 0) {
             String forgetToken = UUID.randomUUID().toString(); //生成一个不可重复的字符串
-            TokenCache.setKey("token_" + username, forgetToken);
+            TokenCache.setKey(TokenCache.TOKEN_PREFIX + username, forgetToken);
             return ServiceResponse.createBySuccess(forgetToken);
         }
         return ServiceResponse.createByErrorMessage("找回密码的答案验证失败");
@@ -165,6 +165,9 @@ public class UserServiceImpl implements IUserService {
         if (resultCount == 0) {
             return ServiceResponse.createByErrorMessage("旧密码错误");
         }
+        if (oldPassword == newPassword){
+            return ServiceResponse.createByErrorMessage("新密码不能与旧密码一致");
+        }
         user.setPassword(MD5Util.MD5EncodeUtf8(newPassword));
         resultCount = userMapper.updateByPrimaryKeySelective(user);
         if (resultCount > 0) {
@@ -175,16 +178,32 @@ public class UserServiceImpl implements IUserService {
 
     @Override
     public ServiceResponse<User> updateInformation(User user) {
-        //先判断email是不是被其他用户占用了
+        //判断邮箱是否合法
+        if (!RegularExpressionUtil.isEmail(user.getEmail())){
+            return ServiceResponse.createByErrorMessage("邮箱不合法");
+        }
+        //判断email是不是被其他用户占用了
         int resultCount = userMapper.checkEmailByUserId(user.getId(), user.getEmail());
         if (resultCount > 0) {
-            return ServiceResponse.createByErrorMessage("该email已经被其他人注册了，请换个邮箱");
+            return ServiceResponse.createByErrorMessage("该email已经被其他人注册了，请更换邮箱");
         }
+
+        //判断手机号是否合法
+        if (!RegularExpressionUtil.isPhone(user.getPhone())){
+            return ServiceResponse.createByErrorMessage("手机号不合法");
+        }
+        //判断手机号是否被别人注册了
+        resultCount = userMapper.checkPhone(user.getPhone());
+        if (resultCount > 0){
+            return ServiceResponse.createByErrorMessage("该手机号已经被其他人注册了，请更换手机号");
+        }
+
         User updateUser = new User();
         updateUser.setUsername(user.getUsername());
         updateUser.setEmail(user.getEmail());
         updateUser.setQuestion(user.getQuestion());
         updateUser.setAnswer(user.getAnswer());
+        updateUser.setPhone(user.getPhone());
 
         resultCount = userMapper.updateByPrimaryKeySelective(updateUser);
         if (resultCount > 0) {
