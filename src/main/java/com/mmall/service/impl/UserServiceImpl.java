@@ -7,6 +7,8 @@ import com.mmall.dao.UserMapper;
 import com.mmall.pojo.User;
 import com.mmall.service.IUserService;
 import com.mmall.util.MD5Util;
+import com.mmall.util.RegularExpressionUtil;
+
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -46,6 +48,18 @@ public class UserServiceImpl implements IUserService {
         if (!validResponse.isSuccess()) {
             return ServiceResponse.createByErrorMessage("邮箱已经存在");
         }
+        //验证邮箱账号是否合法
+        if (!RegularExpressionUtil.isEmail(user.getEmail())) {
+            return ServiceResponse.createByErrorMessage("邮箱账号不合法");
+        }
+        validResponse = this.checkValid(user.getPhone(), Const.PHONE);
+        if (!validResponse.isSuccess()) {
+            return ServiceResponse.createByErrorMessage("手机号已经存在");
+        }
+        //验证手机账号是否合法
+        if (!RegularExpressionUtil.isPhone(user.getPhone())) {
+            return ServiceResponse.createByErrorMessage("手机号不合法");
+        }
 
         user.setRole(Const.Role.ROLE_CUSTOMER);
         user.setPassword(MD5Util.MD5EncodeUtf8(user.getPassword()));
@@ -65,11 +79,23 @@ public class UserServiceImpl implements IUserService {
                 if (resultCount > 0) {
                     return ServiceResponse.createByErrorMessage("用户名已经存在");
                 }
+            } else if (Const.EMAIL.equals(type)) {
+                if (!RegularExpressionUtil.isEmail(str)) {
+                    return ServiceResponse.createByErrorMessage("邮箱不合法");
+                }
             }
             else if (Const.EMAIL.equals(type)) {
                 int resultCount = userMapper.checkEmail(str);
                 if (resultCount > 0) {
                     return ServiceResponse.createByErrorMessage("邮箱已经存在");
+                }
+            } else if (Const.PHONE.equals(type)) {
+                if (!RegularExpressionUtil.isPhone(str)) {
+                    return ServiceResponse.createByErrorMessage("手机号不合法");
+                }
+                int resultCount = userMapper.checkPhone(str);
+                if (resultCount > 0) {
+                    return ServiceResponse.createByErrorMessage("这个手机号已经被注册了");
                 }
             }else {
                 return ServiceResponse.createByErrorMessage("type错误");
@@ -82,6 +108,10 @@ public class UserServiceImpl implements IUserService {
 
     @Override
     public ServiceResponse selectQuestion(String username) {
+        //判断username是不是为空
+        if (StringUtils.isBlank(username)){
+            return ServiceResponse.createByErrorMessage("username不能为空");
+        }
         //先校验传来的username是否存在
         ServiceResponse validResponse = this.checkValid(username, Const.USERNAME);
         if (validResponse.isSuccess()) {
@@ -95,36 +125,39 @@ public class UserServiceImpl implements IUserService {
     }
 
     @Override
-    public ServiceResponse<String> checkAnswer(String username, String question, String password) {
-        int resultCount = userMapper.checkAnswer(username, question, password);
+    public ServiceResponse<String> checkAnswer(String username, String question, String answer) {
+        if (StringUtils.isBlank(username) || StringUtils.isBlank(question) || StringUtils.isBlank(answer)){
+            return ServiceResponse.createByErrorMessage("参数不能为空");
+        }
+        int resultCount = userMapper.checkAnswer(username, question, answer);
         if (resultCount > 0) {
             String forgetToken = UUID.randomUUID().toString(); //生成一个不可重复的字符串
-            TokenCache.setKey("token_" + username, forgetToken);
+            TokenCache.setKey(TokenCache.TOKEN_PREFIX + username, forgetToken);
             return ServiceResponse.createBySuccess(forgetToken);
         }
-        return ServiceResponse.createByErrorMessage("密码验证失败");
+        return ServiceResponse.createByErrorMessage("找回密码的答案验证失败");
     }
 
     @Override
     public ServiceResponse<String> forgetRestPassword(String username, String newPassword, String forgetToken) {
-        if (StringUtils.isBlank(forgetToken)){
+        if (StringUtils.isBlank(forgetToken)) {
             return ServiceResponse.createByErrorMessage("token需要重新获取");
         }
         ServiceResponse checkUsername = this.checkValid(username, Const.USERNAME);
-        if (checkUsername.isSuccess()){
+        if (checkUsername.isSuccess()) {
             return ServiceResponse.createByErrorMessage("用户不存在");
         }
-        String token = TokenCache.getKey(TokenCache.TOKEN_PREFIX+username);
-        if (StringUtils.isBlank(token)){
+        String token = TokenCache.getKey(TokenCache.TOKEN_PREFIX + username);
+        if (StringUtils.isBlank(token)) {
             return ServiceResponse.createByErrorMessage("token无效");
         }
-        if (StringUtils.equals(token,forgetToken)){
+        if (StringUtils.equals(token, forgetToken)) {
             String md5Password = MD5Util.MD5EncodeUtf8(newPassword);
             int resultCount = userMapper.updatePassword(username, md5Password);
-            if (resultCount > 0){
+            if (resultCount > 0) {
                 return ServiceResponse.createBySuccessMesage("修改密码成功");
             }
-        }else {
+        } else {
             return ServiceResponse.createByErrorMessage("token错误,重新获取重置密码token");
         }
         return ServiceResponse.createByErrorMessage("修改密码失败");
@@ -133,32 +166,52 @@ public class UserServiceImpl implements IUserService {
     @Override
     public ServiceResponse<String> resetPassword(String oldPassword, String newPassword, User user) {
         int resultCount = userMapper.checkPassword(user.getId(), MD5Util.MD5EncodeUtf8(oldPassword));
-        if (resultCount == 0){
+        if (resultCount == 0) {
             return ServiceResponse.createByErrorMessage("旧密码错误");
+        }
+        if (oldPassword == newPassword){
+            return ServiceResponse.createByErrorMessage("新密码不能与旧密码一致");
         }
         user.setPassword(MD5Util.MD5EncodeUtf8(newPassword));
         resultCount = userMapper.updateByPrimaryKeySelective(user);
-        if (resultCount > 0){
-            return ServiceResponse.createBySuccessMesage("密码修改成功");
+        if (resultCount > 0) {
+           return ServiceResponse.createBySuccessMesage("密码修改成功");
         }
         return ServiceResponse.createByErrorMessage("密码修改失败");
     }
 
     @Override
     public ServiceResponse<User> updateInformation(User user) {
-        //先判断email是不是被其他用户占用了
-        int resultCount = userMapper.checkEmailByUserId(user.getId(), user.getEmail());
-        if (resultCount > 0){
-            return ServiceResponse.createByErrorMessage("该email已经被其他人注册了，请换个邮箱");
+
+        //判断邮箱是否合法
+        if (!RegularExpressionUtil.isEmail(user.getEmail())){
+            return ServiceResponse.createByErrorMessage("邮箱不合法");
         }
+        //判断email是不是被其他用户占用了
+        int resultCount = userMapper.checkEmailByUserId(user.getId(), user.getEmail());
+        if (resultCount > 0) {
+            return ServiceResponse.createByErrorMessage("该email已经被其他人注册了，请更换邮箱");
+        }
+
+        //判断手机号是否合法
+        if (!RegularExpressionUtil.isPhone(user.getPhone())){
+            return ServiceResponse.createByErrorMessage("手机号不合法");
+        }
+        //判断手机号是否被别人注册了
+        resultCount = userMapper.checkPhone(user.getPhone());
+        if (resultCount > 0){
+            return ServiceResponse.createByErrorMessage("该手机号已经被其他人注册了，请更换手机号");
+        }
+
         User updateUser = new User();
         updateUser.setUsername(user.getUsername());
         updateUser.setEmail(user.getEmail());
         updateUser.setQuestion(user.getQuestion());
         updateUser.setAnswer(user.getAnswer());
+        updateUser.setPhone(user.getPhone());
 
         resultCount = userMapper.updateByPrimaryKeySelective(updateUser);
-        if (resultCount > 0){
+        if (resultCount > 0) {
             return ServiceResponse.createBySuccess("更新信息成功", updateUser);
         }
         return ServiceResponse.createByErrorMessage("更新信息失败");
@@ -167,10 +220,18 @@ public class UserServiceImpl implements IUserService {
     @Override
     public ServiceResponse<User> getInformation(Integer userId) {
         User user = userMapper.selectByPrimaryKey(userId);
-        if (user == null){
+        if (user == null) {
             return ServiceResponse.createByErrorMessage("用户不存在");
         }
         user.setPassword(StringUtils.EMPTY);
         return ServiceResponse.createBySuccess(user);
+    }
+
+    @Override
+    public ServiceResponse checkAdminRole(User user) {
+        if (user != null && user.getRole().intValue() == Const.Role.ROLE_ADMIN) {
+            return ServiceResponse.createBySuccess();
+        }
+        return ServiceResponse.createByError();
     }
 }
