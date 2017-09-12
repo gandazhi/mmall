@@ -8,6 +8,7 @@ import com.mmall.pojo.User;
 import com.mmall.service.IUserService;
 import com.mmall.util.MD5Util;
 import com.mmall.util.RegularExpressionUtil;
+
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -59,6 +60,7 @@ public class UserServiceImpl implements IUserService {
         if (!RegularExpressionUtil.isPhone(user.getPhone())) {
             return ServiceResponse.createByErrorMessage("手机号不合法");
         }
+
         user.setRole(Const.Role.ROLE_CUSTOMER);
         user.setPassword(MD5Util.MD5EncodeUtf8(user.getPassword()));
         int resultCount = userMapper.insert(user);
@@ -81,6 +83,8 @@ public class UserServiceImpl implements IUserService {
                 if (!RegularExpressionUtil.isEmail(str)) {
                     return ServiceResponse.createByErrorMessage("邮箱不合法");
                 }
+            }
+            else if (Const.EMAIL.equals(type)) {
                 int resultCount = userMapper.checkEmail(str);
                 if (resultCount > 0) {
                     return ServiceResponse.createByErrorMessage("邮箱已经存在");
@@ -93,7 +97,7 @@ public class UserServiceImpl implements IUserService {
                 if (resultCount > 0) {
                     return ServiceResponse.createByErrorMessage("这个手机号已经被注册了");
                 }
-            } else {
+            }else {
                 return ServiceResponse.createByErrorMessage("type错误");
             }
         } else {
@@ -171,13 +175,14 @@ public class UserServiceImpl implements IUserService {
         user.setPassword(MD5Util.MD5EncodeUtf8(newPassword));
         resultCount = userMapper.updateByPrimaryKeySelective(user);
         if (resultCount > 0) {
-            return ServiceResponse.createBySuccessMesage("密码修改成功");
+           return ServiceResponse.createBySuccessMesage("密码修改成功");
         }
         return ServiceResponse.createByErrorMessage("密码修改失败");
     }
 
     @Override
     public ServiceResponse<User> updateInformation(User user) {
+
         //判断邮箱是否合法
         if (!RegularExpressionUtil.isEmail(user.getEmail())){
             return ServiceResponse.createByErrorMessage("邮箱不合法");
