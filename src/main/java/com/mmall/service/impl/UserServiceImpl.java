@@ -121,14 +121,17 @@ public class UserServiceImpl implements IUserService {
     }
 
     @Override
-    public ServiceResponse<String> checkAnswer(String username, String question, String password) {
-        int resultCount = userMapper.checkAnswer(username, question, password);
+    public ServiceResponse<String> checkAnswer(String username, String question, String answer) {
+        if (StringUtils.isBlank(username) || StringUtils.isBlank(question) || StringUtils.isBlank(answer)){
+            return ServiceResponse.createByErrorMessage("参数不能为空");
+        }
+        int resultCount = userMapper.checkAnswer(username, question, answer);
         if (resultCount > 0) {
             String forgetToken = UUID.randomUUID().toString(); //生成一个不可重复的字符串
             TokenCache.setKey("token_" + username, forgetToken);
             return ServiceResponse.createBySuccess(forgetToken);
         }
-        return ServiceResponse.createByErrorMessage("密码验证失败");
+        return ServiceResponse.createByErrorMessage("找回密码的答案验证失败");
     }
 
     @Override
