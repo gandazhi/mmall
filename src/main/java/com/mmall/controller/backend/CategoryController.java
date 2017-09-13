@@ -43,18 +43,48 @@ public class CategoryController {
 
     @RequestMapping(value = "update_category_name.do", method = RequestMethod.POST)
     @ResponseBody
-    public ServiceResponse updateCategoryName(HttpSession session, String categoryName, Integer categoryId){
+    public ServiceResponse updateCategoryName(HttpSession session, String categoryName, Integer categoryId) {
         //先判断用户登录状态
         User user = ((User) session.getAttribute(Const.CURRENT_USER));
-        if (user == null){
+        if (user == null) {
             return ServiceResponse.createByErrorCodeMessage(ResponseCode.NEED_LOGIN.getCode(), "用户没有登录，请登录");
         }
         //校验登录用户是否是管理员
         ServiceResponse response = iUserService.checkAdminRole(user);
-        if (response.isSuccess()){
+        if (response.isSuccess()) {
             //登录用户是管理员，继续更新分类名的操作
             return iCategoryService.updateCategoryName(categoryName, categoryId);
         }
-        return ServiceResponse.createByErrorMessage("不是管理员，不能更新分类名");
+        return ServiceResponse.createByErrorMessage("登录用户不是管理员，没有权限");
+    }
+
+    @RequestMapping(value = "get_children_parallel_category.do", method = RequestMethod.GET)
+    @ResponseBody
+    public ServiceResponse getChildrenParallelCategory(HttpSession session, @RequestParam(value = "categoryId", defaultValue = "0") Integer categoryId) {
+        User user = ((User) session.getAttribute(Const.CURRENT_USER));
+        if (user == null) {
+            return ServiceResponse.createByErrorCodeMessage(ResponseCode.NEED_LOGIN.getCode(), "用户没有登录，请登录");
+        }
+        ServiceResponse response = iUserService.checkAdminRole(user);
+        if (response.isSuccess()) {
+            //用户是管理员，继续进行查询子分类下的平级分类
+            return iCategoryService.getChildrenParallelCategory(categoryId);
+        }
+        return ServiceResponse.createByErrorMessage("登录用户不是管理员，没有权限");
+    }
+
+    @RequestMapping(value = "get_deep_category.do", method = RequestMethod.GET)
+    @ResponseBody
+    public ServiceResponse getCategoryAndDeepChildrenCategory(HttpSession session, @RequestParam(value = "categoryId", defaultValue = "0") Integer categoryId) {
+        User user = ((User) session.getAttribute(Const.CURRENT_USER));
+        if (user == null){
+            return ServiceResponse.createByErrorCodeMessage(ResponseCode.NEED_LOGIN.getCode(), "用户没有登录，请登录");
+        }
+        ServiceResponse response = iUserService.checkAdminRole(user);
+        if (response.isSuccess()){
+            //用户是管理员，查询当前节点的id和递归子节点的id
+            return iCategoryService.selectCategoryAndChildrenById(categoryId);
+        }
+        return ServiceResponse.createByErrorMessage("登录用户不是管理员，没有权限");
     }
 }
