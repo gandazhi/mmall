@@ -122,4 +122,10 @@
     WHERE parent_id = #{parentId}
     and name = #{categoryName}
   </select>
+
+  <select id="selectCategoryChildrenByParentId" resultMap="BaseResultMap" parameterType="int">
+    SELECT <include refid="Base_Column_List"/>
+    FROM mmall_category
+    WHERE parent_id = #{parentId}
+  </select>
 </mapper>
