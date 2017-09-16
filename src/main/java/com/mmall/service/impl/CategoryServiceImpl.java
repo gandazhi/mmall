@@ -83,6 +83,7 @@ public class CategoryServiceImpl implements ICategoryService {
     }
 
     //递归算法
+    //先通过id查找所有父节点，在把该id作为parentId，查找所有的子节点，这样重复便利，查找该节点下的所有子节点
     private Set<Category> findChildCategory(Set<Category> categorySet, Integer categoryId) {
         Category category = categoryMapper.selectByPrimaryKey(categoryId);
         if (category != null) {
