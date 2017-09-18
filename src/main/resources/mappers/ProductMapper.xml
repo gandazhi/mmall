@@ -182,4 +182,10 @@
     FROM mmall_product
     WHERE id = #{productId}
   </select>
+
+    <select id="selectList" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM mmall_product
+        ORDER BY id ASC
+    </select>
 </mapper>
