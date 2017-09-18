@@ -34,7 +34,7 @@ public class ProductMangeController {
      * @param product 传入需要更新的产品
      * @return
      */
-    @RequestMapping("save.do")
+    @RequestMapping(value = "save.do", method = RequestMethod.POST)
     @ResponseBody
     public ServiceResponse productSave(HttpSession session, Product product) {
         User user = ((User) session.getAttribute(Const.CURRENT_USER));
