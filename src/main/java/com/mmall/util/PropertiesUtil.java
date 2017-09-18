@@ -8,9 +8,9 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.Properties;
 
-public class PropertireUtil {
+public class PropertiesUtil {
 
-    private static Logger logger = LoggerFactory.getLogger(PropertireUtil.class);
+    private static Logger logger = LoggerFactory.getLogger(PropertiesUtil.class);
 
     private static Properties props;
 
@@ -18,13 +18,13 @@ public class PropertireUtil {
         String fileName = "mmall.properties";
         props = new Properties();
         try {
-            props.load(new InputStreamReader(PropertireUtil.class.getResourceAsStream(fileName), "UTF-8"));
+            props.load(new InputStreamReader(PropertiesUtil.class.getClassLoader().getResourceAsStream(fileName), "UTF-8"));
         } catch (IOException e) {
             logger.error("配置文件读取错误", e);
         }
     }
 
-    public static String getPropertire(String key){
+    public static String getProperties(String key){
         String value = props.getProperty(key.trim());
         if (StringUtils.isBlank(value.trim())){
             return null;
@@ -32,7 +32,7 @@ public class PropertireUtil {
         return value;
     }
 
-    public static String getPropertire(String key, String defaultValue){
+    public static String getProperties(String key, String defaultValue){
         String value = props.getProperty(key.trim());
         if (StringUtils.isBlank(value.trim())){
             value = defaultValue;

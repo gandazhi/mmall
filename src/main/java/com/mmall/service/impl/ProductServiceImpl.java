@@ -2,14 +2,15 @@ package com.mmall.service.impl;
 
 import com.mmall.common.ResponseCode;
 import com.mmall.common.ServiceResponse;
+import com.mmall.dao.CategoryMapper;
 import com.mmall.dao.ProductMapper;
+import com.mmall.pojo.Category;
 import com.mmall.pojo.Product;
 import com.mmall.service.IProductService;
 import com.mmall.util.DateTimeUtil;
-import com.mmall.util.PropertireUtil;
+import com.mmall.util.PropertiesUtil;
 import com.mmall.vo.ProductDetailVo;
 import org.apache.commons.lang3.StringUtils;
-import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -18,6 +19,8 @@ public class ProductServiceImpl implements IProductService {
 
     @Autowired
     private ProductMapper productMapper;
+    @Autowired
+    private CategoryMapper categoryMapper;
 
     @Override
     public ServiceResponse saveOrUpdateProduct(Product product) {
@@ -86,11 +89,11 @@ public class ProductServiceImpl implements IProductService {
         if (product == null){
             return ServiceResponse.createByErrorMessage("没有找到传入productId的产品");
         }
-        ProductDetailVo productDetailVo = assembleProductDeatilVo(product);
+        ProductDetailVo productDetailVo = assembleProductDetailVo(product);
         return ServiceResponse.createBySuccess(productDetailVo);
     }
 
-    private ProductDetailVo assembleProductDeatilVo(Product product){
+    private ProductDetailVo assembleProductDetailVo(Product product){
         ProductDetailVo productDetailVo = new ProductDetailVo();
         productDetailVo.setId(product.getId());
         productDetailVo.setCategoryId(product.getCategoryId());
@@ -101,8 +104,16 @@ public class ProductServiceImpl implements IProductService {
         productDetailVo.setDetail(product.getDetail());
         productDetailVo.setStock(product.getStock());
         productDetailVo.setStatus(product.getStatus());
+        productDetailVo.setPrice(product.getPrice());
 
-        productDetailVo.setImageHost(PropertireUtil.getPropertire("ftp.server.http.prefix", "http://img.happymmall.com/"));
+        Category category = categoryMapper.selectByPrimaryKey(product.getCategoryId());
+        if (category == null){
+            productDetailVo.setParentCategoryId(0);
+        }else {
+            productDetailVo.setParentCategoryId(category.getParentId());
+        }
+
+        productDetailVo.setImageHost(PropertiesUtil.getProperties("ftp.server.http.prefix", "http://img.happymmall.com/"));
         productDetailVo.setCreateTime(DateTimeUtil.dateToStr(product.getCreateTime()));
         productDetailVo.setUpdateTime(DateTimeUtil.dateToStr(product.getUpdateTime()));
 

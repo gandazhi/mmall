@@ -11,6 +11,7 @@ import com.mmall.vo.ProductDetailVo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import javax.servlet.http.HttpSession;
@@ -80,7 +81,7 @@ public class ProductMangeController {
      * @param productId 传入要获取详情的产品id
      * @return
      */
-    @RequestMapping("get_detail.do")
+    @RequestMapping(value = "get_detail.do", method = RequestMethod.GET)
     @ResponseBody
     public ServiceResponse<ProductDetailVo> getDetail(HttpSession session, Integer productId) {
         User user = ((User) session.getAttribute(Const.CURRENT_USER));
