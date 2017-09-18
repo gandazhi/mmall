@@ -58,7 +58,7 @@ public class ProductMangeController {
      * @param status    更新产品后的销售状态
      * @return
      */
-    @RequestMapping("set_sale_status.do")
+    @RequestMapping(value = "set_sale_status.do", method = RequestMethod.POST)
     @ResponseBody
     public ServiceResponse setSaleStatus(HttpSession session, Integer productId, Integer status) {
         User user = ((User) session.getAttribute(Const.CURRENT_USER));
