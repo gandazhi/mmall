@@ -5,7 +5,11 @@ import com.mmall.common.ServiceResponse;
 import com.mmall.dao.ProductMapper;
 import com.mmall.pojo.Product;
 import com.mmall.service.IProductService;
+import com.mmall.util.DateTimeUtil;
+import com.mmall.util.PropertireUtil;
+import com.mmall.vo.ProductDetailVo;
 import org.apache.commons.lang3.StringUtils;
+import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -70,5 +74,38 @@ public class ProductServiceImpl implements IProductService {
             //没有传入的产品id
             return ServiceResponse.createByErrorMessage("没有找到传入productId的产品");
         }
+    }
+
+    @Override
+    public ServiceResponse<ProductDetailVo> manageProductDetail(Integer productId) {
+        //先判断传来的productId是否为空
+        if (productId == null){
+            return ServiceResponse.createByErrorMessage("参数不能为空");
+        }
+        Product product = productMapper.selectByPrimaryKey(productId);
+        if (product == null){
+            return ServiceResponse.createByErrorMessage("没有找到传入productId的产品");
+        }
+        ProductDetailVo productDetailVo = assembleProductDeatilVo(product);
+        return ServiceResponse.createBySuccess(productDetailVo);
+    }
+
+    private ProductDetailVo assembleProductDeatilVo(Product product){
+        ProductDetailVo productDetailVo = new ProductDetailVo();
+        productDetailVo.setId(product.getId());
+        productDetailVo.setCategoryId(product.getCategoryId());
+        productDetailVo.setName(product.getName());
+        productDetailVo.setSubTitle(product.getSubtitle());
+        productDetailVo.setMainImage(product.getMainImage());
+        productDetailVo.setSubImage(product.getSubImages());
+        productDetailVo.setDetail(product.getDetail());
+        productDetailVo.setStock(product.getStock());
+        productDetailVo.setStatus(product.getStatus());
+
+        productDetailVo.setImageHost(PropertireUtil.getPropertire("ftp.server.http.prefix", "http://img.happymmall.com/"));
+        productDetailVo.setCreateTime(DateTimeUtil.dateToStr(product.getCreateTime()));
+        productDetailVo.setUpdateTime(DateTimeUtil.dateToStr(product.getUpdateTime()));
+
+        return productDetailVo;
     }
 }

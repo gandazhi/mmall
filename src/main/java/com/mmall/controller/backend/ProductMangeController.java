@@ -7,6 +7,7 @@ import com.mmall.pojo.Product;
 import com.mmall.pojo.User;
 import com.mmall.service.IProductService;
 import com.mmall.service.IUserService;
+import com.mmall.vo.ProductDetailVo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -69,6 +70,29 @@ public class ProductMangeController {
             return iProductService.setSaleStatus(productId, status);
         } else {
             return ServiceResponse.createByErrorMessage("用户用户无权限进行次操作");
+        }
+    }
+
+    /**
+     * 获取产品详情信息
+     *
+     * @param session   根据session来判断用户是否登录，是否是管理员
+     * @param productId 传入要获取详情的产品id
+     * @return
+     */
+    @RequestMapping("get_detail.do")
+    @ResponseBody
+    public ServiceResponse<ProductDetailVo> getDetail(HttpSession session, Integer productId) {
+        User user = ((User) session.getAttribute(Const.CURRENT_USER));
+        if (user == null) {
+            return ServiceResponse.createByErrorCodeMessage(ResponseCode.NEED_LOGIN.getCode(), "用户没有登录，请登录");
+        }
+        ServiceResponse response = iUserService.checkAdminRole(user);
+        if (response.isSuccess()) {
+            //登录用户是管理员
+            return iProductService.manageProductDetail(productId);
+        } else {
+            return ServiceResponse.createByErrorMessage("用户没有权限进行此操作");
         }
     }
 }
