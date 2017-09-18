@@ -121,4 +121,33 @@ public class ProductMangeController {
             return ServiceResponse.createByErrorMessage("用户没有权限进行此操作");
         }
     }
+
+    /**
+     * 通过productName和productId来搜索商品，可以只传productName，或者productId，但是不能不传参数
+     *
+     * @param session     通过session判断用户是否登录，是否是管理员
+     * @param productName 搜索的商品名
+     * @param productId   搜索的商品id
+     * @param pageNum     分页的当前页数
+     * @param pageSize    分页，每页显示的商品数量
+     * @return
+     */
+    @RequestMapping(value = "product_search.do", method = RequestMethod.GET)
+    @ResponseBody
+    public ServiceResponse productSearch(HttpSession session, String productName, Integer productId,
+                                         @RequestParam(value = "pageNum", defaultValue = "1") int pageNum,
+                                         @RequestParam(value = "pageSize", defaultValue = "10") int pageSize) {
+        User user = ((User) session.getAttribute(Const.CURRENT_USER));
+        if (user == null) {
+            return ServiceResponse.createByErrorCodeMessage(ResponseCode.NEED_LOGIN.getCode(), "用户没有登录，请登录");
+        }
+        ServiceResponse response = iUserService.checkAdminRole(user);
+        if (response.isSuccess()) {
+            //登录用户是管理员
+            return iProductService.productSearch(productName, productId, pageNum, pageSize);
+        } else {
+            return ServiceResponse.createByErrorMessage("用户没有权限进行此操作");
+        }
+
+    }
 }

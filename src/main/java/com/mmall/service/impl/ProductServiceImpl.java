@@ -15,6 +15,7 @@ import com.mmall.util.DateTimeUtil;
 import com.mmall.util.PropertiesUtil;
 import com.mmall.vo.ProductDetailVo;
 import com.mmall.vo.ProductListVo;
+import com.sun.org.apache.regexp.internal.RE;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -90,18 +91,18 @@ public class ProductServiceImpl implements IProductService {
     @Override
     public ServiceResponse<ProductDetailVo> manageProductDetail(Integer productId) {
         //先判断传来的productId是否为空
-        if (productId == null){
+        if (productId == null) {
             return ServiceResponse.createByErrorCodeMessage(ResponseCode.ILLEGAL_ARGUMENT.getCode(), ResponseCode.ILLEGAL_ARGUMENT.getDesc());
         }
         Product product = productMapper.selectByPrimaryKey(productId);
-        if (product == null){
+        if (product == null) {
             return ServiceResponse.createByErrorMessage("没有找到传入productId的产品");
         }
         ProductDetailVo productDetailVo = assembleProductDetailVo(product);
         return ServiceResponse.createBySuccess(productDetailVo);
     }
 
-    private ProductDetailVo assembleProductDetailVo(Product product){
+    private ProductDetailVo assembleProductDetailVo(Product product) {
         ProductDetailVo productDetailVo = new ProductDetailVo();
         productDetailVo.setId(product.getId());
         productDetailVo.setCategoryId(product.getCategoryId());
@@ -115,9 +116,9 @@ public class ProductServiceImpl implements IProductService {
         productDetailVo.setPrice(product.getPrice());
 
         Category category = categoryMapper.selectByPrimaryKey(product.getCategoryId());
-        if (category == null){
+        if (category == null) {
             productDetailVo.setParentCategoryId(0);
-        }else {
+        } else {
             productDetailVo.setParentCategoryId(category.getParentId());
         }
 
@@ -130,11 +131,16 @@ public class ProductServiceImpl implements IProductService {
 
     @Override
     public ServiceResponse<PageInfo> getProductList(int pageNum, int pageSize) {
+        /**
+         *  1.startPage--start
+         *  2.填充自己的sql
+         *  3.pageHelper-收尾
+         */
         PageHelper.startPage(pageNum, pageSize);
         List<Product> productList = productMapper.selectList();
 
         List<ProductListVo> productListVoList = Lists.newArrayList();
-        for (Product productItem : productList){
+        for (Product productItem : productList) {
             ProductListVo productListVo = assembleProductListVo(productItem);
             productListVoList.add(productListVo);
         }
@@ -144,7 +150,7 @@ public class ProductServiceImpl implements IProductService {
         return ServiceResponse.createBySuccess(pageResult);
     }
 
-    private ProductListVo assembleProductListVo(Product product){
+    private ProductListVo assembleProductListVo(Product product) {
         ProductListVo productListVo = new ProductListVo();
         productListVo.setId(product.getId());
         productListVo.setCategoryId(product.getCategoryId());
@@ -156,5 +162,31 @@ public class ProductServiceImpl implements IProductService {
         productListVo.setImageHost(PropertiesUtil.getProperties("ftp.server.http.prefix", "http://img.happymmall.com/"));
 
         return productListVo;
+    }
+
+    @Override
+    public ServiceResponse<PageInfo> productSearch(String productName, Integer productId, int pageNum, int pageSize) {
+        //判断productName和pageNum是否都为空
+        if (StringUtils.isBlank(productName) && productId == null) {
+            return ServiceResponse.createByErrorCodeMessage(ResponseCode.ILLEGAL_ARGUMENT.getCode(), ResponseCode.ILLEGAL_ARGUMENT.getDesc());
+        }
+        PageHelper.startPage(pageNum, pageSize); //pageHelper第一步,startPage
+
+        //pageHelper第二步，开始填充自己的sql
+        if (StringUtils.isNotBlank(productName)) {
+            productName = new StringBuilder().append("%").append(productName).append("%").toString();
+        }
+        List<Product> productList = productMapper.selectByNameAndProductId(productName, productId);
+
+        List<ProductListVo> productListVoList = Lists.newArrayList();
+        for (Product productItem : productList) {
+            ProductListVo productListVo = assembleProductListVo(productItem);
+            productListVoList.add(productListVo);
+        }
+
+        //pageHelper第三步，收尾
+        PageInfo pageResult = new PageInfo(productList);
+        pageResult.setList(productListVoList);
+        return ServiceResponse.createBySuccess(pageResult);
     }
 }
