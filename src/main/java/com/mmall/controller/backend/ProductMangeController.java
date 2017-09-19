@@ -1,12 +1,15 @@
 package com.mmall.controller.backend;
 
+import com.google.common.collect.Maps;
 import com.mmall.common.Const;
 import com.mmall.common.ResponseCode;
 import com.mmall.common.ServiceResponse;
 import com.mmall.pojo.Product;
 import com.mmall.pojo.User;
+import com.mmall.service.IFileService;
 import com.mmall.service.IProductService;
 import com.mmall.service.IUserService;
+import com.mmall.util.PropertiesUtil;
 import com.mmall.vo.ProductDetailVo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -14,8 +17,12 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.multipart.MultipartFile;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
+import java.util.Map;
+
 
 @Controller
 @RequestMapping("/manage/product")
@@ -25,6 +32,8 @@ public class ProductMangeController {
     private IUserService iUserService;
     @Autowired
     private IProductService iProductService;
+    @Autowired
+    private IFileService iFileService;
 
     /**
      * 更新或新建产品
@@ -150,5 +159,28 @@ public class ProductMangeController {
             return ServiceResponse.createByErrorMessage("用户没有权限进行此操作");
         }
 
+    }
+    @RequestMapping(value = "upload.do", method = RequestMethod.POST)
+    @ResponseBody
+    public ServiceResponse upload(HttpSession session, MultipartFile file, HttpServletRequest request) {
+        User user = ((User) session.getAttribute(Const.CURRENT_USER));
+        if (user == null) {
+            return ServiceResponse.createByErrorCodeMessage(ResponseCode.NEED_LOGIN.getCode(), "用户未登录，请登录");
+        }
+        ServiceResponse response = iUserService.checkAdminRole(user);
+        if (response.isSuccess()) {
+            //登录用户是管理员
+            String path = request.getSession().getServletContext().getRealPath("upload");
+            String userId = user.getId().toString();
+            String targetFileName = iFileService.upload(file, path, userId);
+            String url = PropertiesUtil.getProperties("qiniu.url")+targetFileName;
+
+            Map fileMap = Maps.newHashMap();
+            fileMap.put("uri", targetFileName);
+            fileMap.put("url", url);
+            return ServiceResponse.createBySuccess(fileMap);
+        } else {
+            return ServiceResponse.createByErrorMessage("用户没有权限进行此操作");
+        }
     }
 }
