@@ -46,8 +46,10 @@ public class FileServiceImpl implements IFileService {
             String localPath = path + "/" + uploadFileName;
 
             //将上传的文件放到七牛云中
-            QiniuUtil.uploadForQiniu(Const.Zone.EAST_CHINA, localPath, uploadFileName);
-
+            boolean upload = QiniuUtil.uploadForQiniu(Const.Zone.EAST_CHINA, localPath, uploadFileName);
+            if (!upload){
+                return "error";
+            }
 //            targetFile.delete();
         } catch (IOException e) {
             logger.error("上传图片失败", e);

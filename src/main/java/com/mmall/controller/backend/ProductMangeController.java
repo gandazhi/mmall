@@ -173,6 +173,9 @@ public class ProductMangeController {
             String path = request.getSession().getServletContext().getRealPath("upload");
             String userId = user.getId().toString();
             String targetFileName = iFileService.upload(file, path, userId);
+            if (targetFileName.equals("error")){
+                return ServiceResponse.createByErrorMessage("上传图片失败");
+            }
             String url = PropertiesUtil.getProperties("qiniu.url")+targetFileName;
 
             Map fileMap = Maps.newHashMap();
