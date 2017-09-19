@@ -1,17 +1,8 @@
 package com.mmall.service.impl;
 
-import com.google.gson.Gson;
 import com.mmall.common.Const;
-import com.mmall.common.ServiceResponse;
 import com.mmall.service.IFileService;
 import com.mmall.util.QiniuUtil;
-import com.qiniu.common.QiniuException;
-import com.qiniu.common.Zone;
-import com.qiniu.http.Response;
-import com.qiniu.storage.Configuration;
-import com.qiniu.storage.UploadManager;
-import com.qiniu.storage.model.DefaultPutRet;
-import com.qiniu.util.Auth;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
