@@ -192,6 +192,7 @@ public class ProductServiceImpl implements IProductService {
         //pageHelper第三步，收尾
         PageInfo pageResult = new PageInfo(productList);
         pageResult.setList(productListVoList);
+
         return ServiceResponse.createBySuccess(pageResult);
     }
 }
