@@ -108,7 +108,8 @@ public class ProductMangeController {
      */
     @RequestMapping(value = "get_list.do", method = RequestMethod.GET)
     @ResponseBody
-    public ServiceResponse getList(HttpSession session, @RequestParam(value = "pageNum", defaultValue = "1") int pageNum, @RequestParam(value = "pageSize", defaultValue = "10") int pageSize) {
+    public ServiceResponse getList(HttpSession session, @RequestParam(value = "pageNum", defaultValue = "1") int pageNum,
+                                   @RequestParam(value = "pageSize", defaultValue = "10") int pageSize) {
         User user = ((User) session.getAttribute(Const.CURRENT_USER));
         if (user == null) {
             return ServiceResponse.createByErrorCodeMessage(ResponseCode.NEED_LOGIN.getCode(), "用户没有登录，请登录");

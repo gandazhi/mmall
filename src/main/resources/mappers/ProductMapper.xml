@@ -196,7 +196,7 @@
         FROM mmall_product
         <where>
             <if test="productName">
-                AND LIKE name = #{productName}
+                AND name LIKE #{productName}
             </if>
             <if test="productId">
                 AND id = #{productId}

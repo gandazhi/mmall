@@ -170,13 +170,18 @@ public class ProductServiceImpl implements IProductService {
         if (StringUtils.isBlank(productName) && productId == null) {
             return ServiceResponse.createByErrorCodeMessage(ResponseCode.ILLEGAL_ARGUMENT.getCode(), ResponseCode.ILLEGAL_ARGUMENT.getDesc());
         }
-        PageHelper.startPage(pageNum, pageSize); //pageHelper第一步,startPage
+        //pageHelper第一步,startPage
+        PageHelper.startPage(pageNum, pageSize);
 
         //pageHelper第二步，开始填充自己的sql
         if (StringUtils.isNotBlank(productName)) {
             productName = new StringBuilder().append("%").append(productName).append("%").toString();
         }
         List<Product> productList = productMapper.selectByNameAndProductId(productName, productId);
+        //判断通过关键字productList是否是空的
+        if (productList.isEmpty()) {
+            return ServiceResponse.createByErrorMessage("没有搜到与关键字相关的商品");
+        }
 
         List<ProductListVo> productListVoList = Lists.newArrayList();
         for (Product productItem : productList) {
