@@ -27,6 +27,9 @@ public class FileServiceImpl implements IFileService {
         boolean isPicture = false;
         for (int i = 0; i <arrayFileExtensionName.length; i++){
             isPicture = fileExtensionName.equals(arrayFileExtensionName[i]);
+            if (isPicture){
+                break;
+            }
         }
         if (!isPicture){
             return "error1";

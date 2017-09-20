@@ -160,9 +160,18 @@ public class ProductMangeController {
         }
 
     }
+
+    /**
+     * 上传图片到七牛云中存储
+     *
+     * @param session 通过session判断用户是否登录，登录用户是否是管理员
+     * @param file    上传的文件，只允许上传图片，上传到七牛云后删除本地中的图片
+     * @param request 通过request来获取路径
+     * @return
+     */
     @RequestMapping(value = "upload.do", method = RequestMethod.POST)
     @ResponseBody
-    public ServiceResponse upload(HttpSession session, MultipartFile file, HttpServletRequest request) {
+    public ServiceResponse upload(HttpSession session, @RequestParam(value = "upload_file", required = false) MultipartFile file, HttpServletRequest request) {
         User user = ((User) session.getAttribute(Const.CURRENT_USER));
         if (user == null) {
             return ServiceResponse.createByErrorCodeMessage(ResponseCode.NEED_LOGIN.getCode(), "用户未登录，请登录");
@@ -173,12 +182,12 @@ public class ProductMangeController {
             String path = request.getSession().getServletContext().getRealPath("upload");
             String userId = user.getId().toString();
             String targetFileName = iFileService.upload(file, path, userId);
-            if (targetFileName.equals("error")){
+            if (targetFileName.equals("error")) {
                 return ServiceResponse.createByErrorMessage("上传图片失败");
-            }else if (targetFileName.equals("error1")){
+            } else if (targetFileName.equals("error1")) {
                 return ServiceResponse.createByErrorMessage("上传的文件类型不是图片");
             }
-            String url = PropertiesUtil.getProperties("qiniu.url")+targetFileName;
+            String url = PropertiesUtil.getProperties("qiniu.url") + targetFileName;
 
             Map fileMap = Maps.newHashMap();
             fileMap.put("uri", targetFileName);
@@ -188,4 +197,6 @@ public class ProductMangeController {
             return ServiceResponse.createByErrorMessage("用户没有权限进行此操作");
         }
     }
+
+
 }

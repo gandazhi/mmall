@@ -10,7 +10,7 @@
 </form>
 
 <form name="upload" action="/manage/product/upload.do" method="post" enctype="multipart/form-data">
-    <input type="file" accept="image/gif,image/jpeg,image/jpg,image/png,image/svg" name="file"/>
+    <input type="file" accept="image/gif,image/jpeg,image/jpg,image/png,image/svg" name="upload_file"/>
     <input type="submit" value="上传图片">
 </form>
 </body>
