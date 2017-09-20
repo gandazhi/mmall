@@ -22,4 +22,24 @@ public class Const {
         int ROLE_ADMIN = 1;//管理员用户
     }
 
+    public enum ProductStatusEnum {
+        ON_SALE(1,"在售");
+
+        private int code;
+        private String status;
+
+        ProductStatusEnum(int code, String status) {
+            this.code = code;
+            this.status = status;
+        }
+
+        public int getCode() {
+            return code;
+        }
+
+        public String getStatus() {
+            return status;
+        }
+    }
+
 }

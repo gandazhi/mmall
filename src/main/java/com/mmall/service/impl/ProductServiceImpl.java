@@ -3,6 +3,7 @@ package com.mmall.service.impl;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import com.google.common.collect.Lists;
+import com.mmall.common.Const;
 import com.mmall.common.ResponseCode;
 import com.mmall.common.ServiceResponse;
 import com.mmall.dao.CategoryMapper;
@@ -85,6 +86,7 @@ public class ProductServiceImpl implements IProductService {
         }
     }
 
+    //后台获取商品详情
     @Override
     public ServiceResponse<ProductDetailVo> manageProductDetail(Integer productId) {
         //先判断传来的productId是否为空
@@ -156,14 +158,14 @@ public class ProductServiceImpl implements IProductService {
         productListVo.setMainImage(product.getMainImage());
         productListVo.setPrice(product.getPrice());
         productListVo.setStatus(product.getStatus());
-        productListVo.setImageHost(PropertiesUtil.getProperties("ftp.server.http.prefix", "http://img.happymmall.com/"));
+        productListVo.setImageHost(PropertiesUtil.getProperties("qiniu.url", "http://owioow1ef.bkt.clouddn.com/"));
 
         return productListVo;
     }
 
     @Override
     public ServiceResponse<PageInfo> productSearch(String productName, Integer productId, int pageNum, int pageSize) {
-        //判断productName和pageNum是否都为空
+        //判断productName和productId是否都为空
         if (StringUtils.isBlank(productName) && productId == null) {
             return ServiceResponse.createByErrorCodeMessage(ResponseCode.ILLEGAL_ARGUMENT.getCode(), ResponseCode.ILLEGAL_ARGUMENT.getDesc());
         }
@@ -187,6 +189,50 @@ public class ProductServiceImpl implements IProductService {
         }
 
         //pageHelper第三步，收尾
+        PageInfo pageResult = new PageInfo(productList);
+        pageResult.setList(productListVoList);
+
+        return ServiceResponse.createBySuccess(pageResult);
+    }
+
+
+    //前台用户-获取商品详情
+    @Override
+    public ServiceResponse<ProductDetailVo> productDetail(Integer productId) {
+        if (productId == null) {
+            return ServiceResponse.createByErrorCodeMessage(ResponseCode.ILLEGAL_ARGUMENT.getCode(), ResponseCode.ILLEGAL_ARGUMENT.getDesc());
+        }
+        Product product = productMapper.selectByPrimaryKey(productId);
+        if (product == null) {
+            return ServiceResponse.createByErrorMessage("没有找到传入productId的产品");
+        }
+        if (product.getStatus() != Const.ProductStatusEnum.ON_SALE.getCode()) {
+            return ServiceResponse.createByErrorMessage("传入productId的商品不是在售状态");
+        }
+        ProductDetailVo productDetailVo = assembleProductDetailVo(product);
+        return ServiceResponse.createBySuccess(productDetailVo);
+    }
+
+    //用户通过关键字搜索
+    public ServiceResponse<PageInfo> searchProductList(String keywords, int pageNum, int pageSize) {
+        if (StringUtils.isBlank(keywords)) {
+            return ServiceResponse.createByErrorCodeMessage(ResponseCode.ILLEGAL_ARGUMENT.getCode(), ResponseCode.ILLEGAL_ARGUMENT.getDesc());
+        }
+        //拼接搜索关键字
+        keywords = "%" + keywords + "%";
+        PageHelper.startPage(pageNum, pageSize);
+
+        List<Product> productList = productMapper.selectByKeywords(keywords);
+        if (productList.isEmpty()){
+            return ServiceResponse.createByErrorMessage("没有搜索到与关键字相关的商品");
+        }
+
+        List<ProductListVo> productListVoList = Lists.newArrayList();
+        for (Product productItem : productList) {
+            ProductListVo productListVo = assembleProductListVo(productItem);
+            productListVoList.add(productListVo);
+        }
+
         PageInfo pageResult = new PageInfo(productList);
         pageResult.setList(productListVoList);
 

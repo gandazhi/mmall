@@ -203,4 +203,12 @@
             </if>
         </where>
     </select>
+
+    <select id="selectByKeywords" resultMap="BaseResultMap" parameterType="string">
+        SELECT
+        <include refid="Base_Column_List"/>
+        FROM mmall_product
+        WHERE name LIKE #{keywords} or
+        subTitle LIKE #{keywords}
+    </select>
 </mapper>
