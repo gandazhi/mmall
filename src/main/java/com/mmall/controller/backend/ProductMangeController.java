@@ -20,6 +20,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import java.util.Map;
 
@@ -195,6 +196,54 @@ public class ProductMangeController {
             return ServiceResponse.createBySuccess(fileMap);
         } else {
             return ServiceResponse.createByErrorMessage("用户没有权限进行此操作");
+        }
+    }
+
+    /**
+     * simEditor 富文本中的图片上传接口
+     *
+     * @param session      通过session判断用户是否上传，是否是管理员
+     * @param file         上传的文件
+     * @param request      通过request获取到path
+     * @param httpResponse 添加header
+     * @return
+     */
+    @RequestMapping(value = "rich_text_image_upload.do", method = RequestMethod.POST)
+    @ResponseBody
+    public Map richTextImgUpload(HttpSession session,
+                                 @RequestParam(value = "upload_file", required = false) MultipartFile file,
+                                 HttpServletRequest request, HttpServletResponse httpResponse) {
+        Map resultMap = Maps.newHashMap();
+        User user = ((User) session.getAttribute(Const.CURRENT_USER));
+        if (user == null) {
+            resultMap.put("success", false);
+            resultMap.put("msg", "用户未登录，请登录");
+            return resultMap;
+        }
+        ServiceResponse response = iUserService.checkAdminRole(user);
+        if (response.isSuccess()) {
+            String path = request.getSession().getServletContext().getRealPath("upload");
+            String userId = user.getId().toString();
+            String targetFileName = iFileService.upload(file, path, userId);
+            if (targetFileName.equals("error1")) {
+                resultMap.put("success", false);
+                resultMap.put("msg", "上传的图片类型不是图片");
+                return resultMap;
+            } else if (targetFileName.equals("error")) {
+                resultMap.put("success", false);
+                resultMap.put("msg", "上传图片失败");
+                return resultMap;
+            }
+            String url = PropertiesUtil.getProperties("qiniu.url") + targetFileName;
+            resultMap.put("success", true);
+            resultMap.put("msg", "上传图片成功");
+            resultMap.put("file_path", url);
+            httpResponse.addHeader("Access-Control-Allow-Headers", "X-File-Name");
+            return resultMap;
+        } else {
+            resultMap.put("success", false);
+            resultMap.put("msg", "用户没有权限进行此操作");
+            return resultMap;
         }
     }
 
