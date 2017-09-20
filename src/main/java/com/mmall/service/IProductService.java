@@ -19,5 +19,5 @@ public interface IProductService {
 
     ServiceResponse<ProductDetailVo> productDetail(Integer productId);
 
-    ServiceResponse<PageInfo> searchProductList(String keywords, int pageNum, int pageSize);
+    ServiceResponse<PageInfo> searchProductList(String keywords, int pageNum, int pageSize, String orderBy);
 }

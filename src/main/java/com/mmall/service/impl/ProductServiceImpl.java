@@ -214,13 +214,20 @@ public class ProductServiceImpl implements IProductService {
     }
 
     //用户通过关键字搜索
-    public ServiceResponse<PageInfo> searchProductList(String keywords, int pageNum, int pageSize) {
+    public ServiceResponse<PageInfo> searchProductList(String keywords, int pageNum, int pageSize, String orderBy) {
         if (StringUtils.isBlank(keywords)) {
             return ServiceResponse.createByErrorCodeMessage(ResponseCode.ILLEGAL_ARGUMENT.getCode(), ResponseCode.ILLEGAL_ARGUMENT.getDesc());
         }
         //拼接搜索关键字
         keywords = "%" + keywords + "%";
         PageHelper.startPage(pageNum, pageSize);
+        //排序处理
+        if (Const.ProductListOrderBy.PRICE_ASC_DESC.contains(orderBy)){
+            String[] orderByArray = orderBy.split("_");
+            PageHelper.orderBy(orderByArray[0]+" "+orderByArray[1]);
+        }else {
+            return ServiceResponse.createByErrorMessage("orderBy参数错误");
+        }
 
         List<Product> productList = productMapper.selectByKeywords(keywords);
         if (productList.isEmpty()){

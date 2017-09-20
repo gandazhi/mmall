@@ -208,7 +208,7 @@
         SELECT
         <include refid="Base_Column_List"/>
         FROM mmall_product
-        WHERE name LIKE #{keywords} or
-        subTitle LIKE #{keywords}
+        WHERE name LIKE #{keywords} and status = 1
+        or subTitle LIKE #{keywords} and status = 1
     </select>
 </mapper>

@@ -54,7 +54,8 @@ public class ProductController {
     @RequestMapping(value = "search_list.do", method = RequestMethod.GET)
     @ResponseBody
     public ServiceResponse<PageInfo> searchProductList(String keywords, @RequestParam(value = "pageNum", defaultValue = "1") int pageNum,
-                                                       @RequestParam(value = "pageSize", defaultValue = "10") int pageSize) {
-        return iProductService.searchProductList(keywords, pageNum, pageSize);
+                                                       @RequestParam(value = "pageSize", defaultValue = "10") int pageSize,
+                                                       @RequestParam(value = "orderBy", required = false) String orderBy) {
+        return iProductService.searchProductList(keywords, pageNum, pageSize, orderBy);
     }
 }
