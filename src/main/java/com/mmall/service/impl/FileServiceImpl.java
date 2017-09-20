@@ -41,7 +41,7 @@ public class FileServiceImpl implements IFileService {
             if (!upload){
                 return "error";
             }
-//            targetFile.delete();
+            targetFile.delete();
         } catch (IOException e) {
             logger.error("上传图片失败", e);
             return null;
