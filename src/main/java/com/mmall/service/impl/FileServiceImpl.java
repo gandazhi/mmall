@@ -22,7 +22,15 @@ public class FileServiceImpl implements IFileService {
 
         String fileName = file.getOriginalFilename();
         String fileExtensionName = fileName.substring(fileName.lastIndexOf(".") + 1);
+        String[] arrayFileExtensionName = {"jpg", "jpeg", "gif", "png", "svg"};
         String uploadFileName = new Date().getTime() + "_" + userId + "." + fileExtensionName;
+        boolean isPicture = false;
+        for (int i = 0; i <arrayFileExtensionName.length; i++){
+            isPicture = fileExtensionName.equals(arrayFileExtensionName[i]);
+        }
+        if (!isPicture){
+            return "error1";
+        }
         logger.info("开始上传文件，上传的文件名{}，上传路径{}，新文件名{}", fileName, path, uploadFileName);
 
         File fileDir = new File(path);
@@ -38,7 +46,7 @@ public class FileServiceImpl implements IFileService {
 
             //将上传的文件放到七牛云中
             boolean upload = QiniuUtil.uploadForQiniu(Const.Zone.EAST_CHINA, localPath, uploadFileName);
-            if (!upload){
+            if (!upload) {
                 return "error";
             }
             targetFile.delete();

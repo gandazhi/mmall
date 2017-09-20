@@ -175,6 +175,8 @@ public class ProductMangeController {
             String targetFileName = iFileService.upload(file, path, userId);
             if (targetFileName.equals("error")){
                 return ServiceResponse.createByErrorMessage("上传图片失败");
+            }else if (targetFileName.equals("error1")){
+                return ServiceResponse.createByErrorMessage("上传的文件类型不是图片");
             }
             String url = PropertiesUtil.getProperties("qiniu.url")+targetFileName;
 
