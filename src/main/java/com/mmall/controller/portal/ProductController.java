@@ -47,8 +47,9 @@ public class ProductController {
     }
 
     /**
+     *
      * @param keywords 搜索关键字
-     * @param pageNum  搜索列表的当前页数
+     * @param pageNum 搜索列表的当前页数
      * @param pageSize 搜索列表每页显示的数量
      * @return
      */
