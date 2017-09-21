@@ -211,4 +211,10 @@
         WHERE name LIKE #{keywords} and status = 1
         or subTitle LIKE #{keywords} and status = 1
     </select>
+
+    <select id="selectUserList" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM mmall_product
+        WHERE status = 1
+    </select>
 </mapper>

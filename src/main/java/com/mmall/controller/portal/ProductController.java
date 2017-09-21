@@ -35,13 +35,15 @@ public class ProductController {
      *
      * @param pageNum  当前分页的页数
      * @param pageSize 每页显示的数量
+     * @param orderBy  排序规则（排序字段_排序规则）
      * @return
      */
     @RequestMapping(value = "get_list.do", method = RequestMethod.GET)
     @ResponseBody
     public ServiceResponse<PageInfo> getProductList(@RequestParam(value = "pageNum", defaultValue = "1") int pageNum,
-                                                    @RequestParam(value = "pageSize", defaultValue = "10") int pageSize) {
-        return iProductService.getProductList(pageNum, pageSize);
+                                                    @RequestParam(value = "pageSize", defaultValue = "10") int pageSize,
+                                                    @RequestParam(value = "orderBy", required = false) String orderBy) {
+        return iProductService.getUserProductList(pageNum, pageSize, orderBy);
     }
 
     /**

@@ -245,4 +245,29 @@ public class ProductServiceImpl implements IProductService {
 
         return ServiceResponse.createBySuccess(pageResult);
     }
+
+    //用户获取商品列表
+    @Override
+    public ServiceResponse<PageInfo> getUserProductList(int pageNum, int pageSize, String orderBy) {
+        PageHelper.startPage(pageNum, pageSize);
+
+        if (StringUtils.isNotBlank(orderBy)){
+            if (Const.ProductListOrderBy.PRICE_ASC_DESC.contains(orderBy)){
+                String[] orderByArray = orderBy.split("_");
+                PageHelper.orderBy(orderByArray[0]+" "+orderByArray[1]);
+            }
+        }
+
+        List<Product> productList = productMapper.selectUserList();
+
+        List<ProductListVo> productListVoList = Lists.newArrayList();
+        for (Product productItem : productList){
+            ProductListVo productListVo = assembleProductListVo(productItem);
+            productListVoList.add(productListVo);
+        }
+
+        PageInfo pageResult = new PageInfo(productList);
+        pageResult.setList(productListVoList);
+        return ServiceResponse.createBySuccess(pageResult);
+    }
 }
