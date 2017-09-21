@@ -35,7 +35,7 @@ public class ProductController {
      *
      * @param pageNum  当前分页的页数
      * @param pageSize 每页显示的数量
-     * @param orderBy  排序规则（排序字段_排序规则）
+     * @param orderBy  排序规则（排序字段-排序规则）
      * @return
      */
     @RequestMapping(value = "get_list.do", method = RequestMethod.GET)
@@ -51,6 +51,7 @@ public class ProductController {
      * @param keywords 搜索关键字
      * @param pageNum 搜索列表的当前页数
      * @param pageSize 搜索列表每页显示的数量
+     * @param orderBy 排序规则（排序字段-排序规则）
      * @return
      */
     @RequestMapping(value = "search_list.do", method = RequestMethod.GET)

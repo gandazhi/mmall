@@ -222,8 +222,8 @@ public class ProductServiceImpl implements IProductService {
         keywords = "%" + keywords + "%";
         PageHelper.startPage(pageNum, pageSize);
         //排序处理
-        if (Const.ProductListOrderBy.PRICE_ASC_DESC.contains(orderBy)){
-            String[] orderByArray = orderBy.split("_");
+        if (Const.ProductListOrderBy.ORDERBY_ASC_DESC.contains(orderBy)){
+            String[] orderByArray = orderBy.split("-");
             PageHelper.orderBy(orderByArray[0]+" "+orderByArray[1]);
         }else {
             return ServiceResponse.createByErrorMessage("orderBy参数错误");
@@ -252,8 +252,8 @@ public class ProductServiceImpl implements IProductService {
         PageHelper.startPage(pageNum, pageSize);
 
         if (StringUtils.isNotBlank(orderBy)){
-            if (Const.ProductListOrderBy.PRICE_ASC_DESC.contains(orderBy)){
-                String[] orderByArray = orderBy.split("_");
+            if (Const.ProductListOrderBy.ORDERBY_ASC_DESC.contains(orderBy)){
+                String[] orderByArray = orderBy.split("-");
                 PageHelper.orderBy(orderByArray[0]+" "+orderByArray[1]);
             }
         }
