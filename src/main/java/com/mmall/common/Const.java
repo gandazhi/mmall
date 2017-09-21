@@ -13,8 +13,8 @@ public class Const {
     public static final String EMAIL = "email";
     public static final String PHONE = "phone";
 
-    public interface ProductListOrderBy{
-        Set<String> PRICE_ASC_DESC = Sets.newHashSet("price_asc", "price_desc");
+    public interface ProductListOrderBy {
+        Set<String> ORDERBY_ASC_DESC = Sets.newHashSet("price-asc", "price-desc", "create_time-asc", "create_time-desc");
     }
 
     //七牛云相关区域的信息
@@ -31,7 +31,7 @@ public class Const {
     }
 
     public enum ProductStatusEnum {
-        ON_SALE(1,"在售");
+        ON_SALE(1, "在售");
 
         private int code;
         private String status;
