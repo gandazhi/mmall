@@ -44,12 +44,16 @@ public class CartServiceImpl implements ICartService {
         Cart cart = cartMapper.selectByUserIdProductId(userId, productId);
         //cart为空，说明购物车中没有这个商品，添加商品
         if (cart == null) {
-            Cart cartItem = new Cart();
-            cartItem.setQuantity(count);
-            cartItem.setProductId(productId);
-            cartItem.setUserId(userId);
-            cartItem.setChecked(Const.CartChecked.CHECK);
-            cartMapper.insert(cartItem);
+            if (count > 0) {
+                Cart cartItem = new Cart();
+                cartItem.setQuantity(count);
+                cartItem.setProductId(productId);
+                cartItem.setUserId(userId);
+                cartItem.setChecked(Const.CartChecked.CHECK);
+                cartMapper.insert(cartItem);
+            }else {
+                return ServiceResponse.createByErrorCodeMessage(ResponseCode.ILLEGAL_ARGUMENT.getCode(), ResponseCode.ILLEGAL_ARGUMENT.getDesc());
+            }
         } else {
             //cart不为空，则是往购物车中添加商品数量，或减少商品数量
             cart.setQuantity(cart.getQuantity() + count);
@@ -120,7 +124,7 @@ public class CartServiceImpl implements ICartService {
                 CartProductVo cartProductVo = new CartProductVo();
                 cartProductVo.setId(cartItem.getId());
                 cartProductVo.setUserId(cartItem.getUserId());
-                cartProductVo.setProductId(cartItem.getUserId());
+                cartProductVo.setProductId(cartItem.getProductId());
 
                 Product product = productMapper.selectByPrimaryKey(cartItem.getProductId());
                 cartProductVo.setProductName(product.getName());
@@ -140,7 +144,7 @@ public class CartServiceImpl implements ICartService {
                     int resultCount = cartMapper.deleteByPrimaryKey(cartProductVo.getId());
                     if (resultCount > 0) {
                         logger.info("购物车中的数据为0，删除了id为" + cartProductVo.getId() + "的数据");
-                    }else {
+                    } else {
                         logger.error("购物车中的数据删除失败");
                     }
                 } else {
