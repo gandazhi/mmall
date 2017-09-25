@@ -35,11 +35,71 @@ public class CartController {
 
     @RequestMapping(value = "get_cart.do", method = RequestMethod.GET)
     @ResponseBody
-    public ServiceResponse<CartVo> getCart(HttpSession session){
+    public ServiceResponse<CartVo> getCart(HttpSession session) {
         User user = ((User) session.getAttribute(Const.CURRENT_USER));
-        if (user == null){
+        if (user == null) {
             return ServiceResponse.createByErrorCodeMessage(ResponseCode.NEED_LOGIN.getCode(), ResponseCode.NEED_LOGIN.getDesc());
         }
         return iCartService.getCart(user.getId());
+    }
+
+    @RequestMapping(value = "delete_cart.do", method = RequestMethod.GET)
+    @ResponseBody
+    public ServiceResponse<CartVo> deleteCart(HttpSession session, String productIds) {
+        User user = ((User) session.getAttribute(Const.CURRENT_USER));
+        if (user == null) {
+            return ServiceResponse.createByErrorCodeMessage(ResponseCode.NEED_LOGIN.getCode(), ResponseCode.NEED_LOGIN.getDesc());
+        }
+        return iCartService.deleteProductIds(user.getId(), productIds);
+    }
+
+    @RequestMapping(value = "checkedAll.do", method = RequestMethod.GET)
+    @ResponseBody
+    public ServiceResponse<CartVo> checkedAll(HttpSession session) {
+        User user = ((User) session.getAttribute(Const.CURRENT_USER));
+        if (user == null) {
+            return ServiceResponse.createByErrorCodeMessage(ResponseCode.NEED_LOGIN.getCode(), ResponseCode.NEED_LOGIN.getDesc());
+        }
+        return iCartService.checkedOrUnCheckedProduct(user.getId(), null, Const.CartChecked.CHECK); // productId为null则是全选
+    }
+
+    @RequestMapping(value = "unCheckedAll.do", method = RequestMethod.GET)
+    @ResponseBody
+    public ServiceResponse<CartVo> uncheckedAll(HttpSession session) {
+        User user = ((User) session.getAttribute(Const.CURRENT_USER));
+        if (user == null) {
+            return ServiceResponse.createByErrorCodeMessage(ResponseCode.NEED_LOGIN.getCode(), ResponseCode.NEED_LOGIN.getDesc());
+        }
+        return iCartService.checkedOrUnCheckedProduct(user.getId(), null, Const.CartChecked.UN_CHECK); // productId为null则是全选
+    }
+
+    @RequestMapping(value = "checkedProduct.do", method = RequestMethod.GET)
+    @ResponseBody
+    public ServiceResponse<CartVo> checkedProduct(HttpSession session, Integer productId) {
+        User user = ((User) session.getAttribute(Const.CURRENT_USER));
+        if (user == null) {
+            return ServiceResponse.createByErrorCodeMessage(ResponseCode.NEED_LOGIN.getCode(), ResponseCode.NEED_LOGIN.getDesc());
+        }
+        return iCartService.checkedOrUnCheckedProduct(user.getId(), productId, Const.CartChecked.CHECK);
+    }
+
+    @RequestMapping(value = "uncheckedProduct.do", method = RequestMethod.GET)
+    @ResponseBody
+    public ServiceResponse<CartVo> uncheckedProduct(HttpSession session, Integer productId) {
+        User user = ((User) session.getAttribute(Const.CURRENT_USER));
+        if (user == null) {
+            return ServiceResponse.createByErrorCodeMessage(ResponseCode.NEED_LOGIN.getCode(), ResponseCode.NEED_LOGIN.getDesc());
+        }
+        return iCartService.checkedOrUnCheckedProduct(user.getId(), productId, Const.CartChecked.UN_CHECK);
+    }
+
+    @RequestMapping(value = "getCartProductCount.do", method = RequestMethod.GET)
+    @ResponseBody
+    public ServiceResponse<Integer> getCartProductCount(HttpSession session){
+        User user = ((User) session.getAttribute(Const.CURRENT_USER));
+        if (user == null){
+            return ServiceResponse.createBySuccess(0);
+        }
+        return iCartService.getCartProductCount(user.getId());
     }
 }

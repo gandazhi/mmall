@@ -12,5 +12,11 @@ public interface ICartService {
 
     ServiceResponse<CartVo> getCart(Integer userId);
 
+    ServiceResponse<CartVo> deleteProductIds(Integer userId, String productIds);
+
+    ServiceResponse<CartVo> checkedOrUnCheckedProduct(Integer userId, Integer productId, Integer checked);
+
+    ServiceResponse<Integer> getCartProductCount(Integer userId);
+
     ServiceResponse<CartVo> addCart(HttpServletRequest request, HttpServletResponse response, Integer productId, Integer count);
 }

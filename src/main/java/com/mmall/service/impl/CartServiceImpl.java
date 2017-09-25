@@ -1,18 +1,23 @@
 package com.mmall.service.impl;
 
+import com.google.common.base.Splitter;
 import com.google.common.collect.Lists;
 import com.mmall.common.Const;
 import com.mmall.common.ResponseCode;
 import com.mmall.common.ServiceResponse;
 import com.mmall.dao.CartMapper;
 import com.mmall.dao.ProductMapper;
+import com.mmall.dao.UserMapper;
 import com.mmall.pojo.Cart;
 import com.mmall.pojo.Product;
+import com.mmall.pojo.User;
 import com.mmall.service.ICartService;
 import com.mmall.util.BigDecimalUtil;
 import com.mmall.util.PropertiesUtil;
 import com.mmall.vo.CartProductVo;
 import com.mmall.vo.CartVo;
+import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,6 +35,8 @@ public class CartServiceImpl implements ICartService {
     private ProductMapper productMapper;
     @Autowired
     private CartMapper cartMapper;
+    @Autowired
+    private UserMapper userMapper;
 
     private Logger logger = LoggerFactory.getLogger(CartServiceImpl.class);
 
@@ -196,12 +203,58 @@ public class CartServiceImpl implements ICartService {
     @Override
     public ServiceResponse<CartVo> getCart(Integer userId) {
         List<Cart> cartList = cartMapper.selectCartByUserId(userId);
-        if (cartList.size() == 0) {
+        if (CollectionUtils.isEmpty(cartList)) {
             return ServiceResponse.createBySuccessMesage("购物车为空");
         } else {
             CartVo cartVo = this.getCartVoLimit(userId, 0); //调用之前的方法，count为0，则不增加，也不减少购物车的数量，直接查出来
             return ServiceResponse.createBySuccess(cartVo);
         }
+    }
+
+    @Override
+    public ServiceResponse<CartVo> deleteProductIds(Integer userId, String productIds) {
+        if (StringUtils.isBlank(productIds)) {
+            return ServiceResponse.createByErrorCodeMessage(ResponseCode.ILLEGAL_ARGUMENT.getCode(), ResponseCode.ILLEGAL_ARGUMENT.getDesc());
+        }
+        List<String> productList = Splitter.on(",").splitToList(productIds); //传来多个productId时，使用 “,” 分割
+        int resultCount = cartMapper.deleteCartByUserIdProductIds(userId, productList);
+        if (resultCount > 0) {
+            return this.getCart(userId);
+        } else {
+            return ServiceResponse.createByErrorMessage("删除购物车失败");
+        }
+    }
+
+    @Override
+    public ServiceResponse<CartVo> checkedOrUnCheckedProduct(Integer userId, Integer productId, Integer checked) {
+        if (checked != Const.CartChecked.CHECK && checked != Const.CartChecked.UN_CHECK) {
+            return ServiceResponse.createByErrorCodeMessage(ResponseCode.ILLEGAL_ARGUMENT.getCode(), ResponseCode.ILLEGAL_ARGUMENT.getDesc());
+        }
+        List<Cart> cartList = cartMapper.selectCartByUserId(userId);
+        if (CollectionUtils.isEmpty(cartList)) {
+            return ServiceResponse.createByErrorMessage("购物车为空，请求失败");
+        }
+        if (productId != null){
+            Cart cart = cartMapper.selectByUserIdProductId(userId, productId);
+            if (cart == null){
+                return ServiceResponse.createByErrorMessage("productId错误");
+            }
+        }
+        cartMapper.checkOrUnCheckProduct(userId, productId, checked); //productId传null的话，就是全部选择，传productId的话，就是单个选择
+        return this.getCart(userId);
+    }
+
+    @Override
+    public ServiceResponse<Integer> getCartProductCount(Integer userId) {
+        if (userId == null){
+            return ServiceResponse.createBySuccess(0);
+        }
+        User user = userMapper.selectByPrimaryKey(userId);
+        if (user == null){
+            return ServiceResponse.createByErrorMessage("没有这个用户");
+        }
+        int resultCount = cartMapper.selectCartProductCount(userId);
+        return ServiceResponse.createBySuccess(resultCount);
     }
 
     @Override
