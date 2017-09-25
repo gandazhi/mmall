@@ -196,10 +196,10 @@ public class CartServiceImpl implements ICartService {
     @Override
     public ServiceResponse<CartVo> getCart(Integer userId) {
         List<Cart> cartList = cartMapper.selectCartByUserId(userId);
-        if (cartList.size() == 0){
+        if (cartList.size() == 0) {
             return ServiceResponse.createBySuccessMesage("购物车为空");
-        }else {
-            CartVo cartVo = this.getCartVoLimit(userId, 0);
+        } else {
+            CartVo cartVo = this.getCartVoLimit(userId, 0); //调用之前的方法，count为0，则不增加，也不减少购物车的数量，直接查出来
             return ServiceResponse.createBySuccess(cartVo);
         }
     }
