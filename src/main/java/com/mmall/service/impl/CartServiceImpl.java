@@ -18,6 +18,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.math.BigDecimal;
 import java.util.List;
 
@@ -51,7 +53,8 @@ public class CartServiceImpl implements ICartService {
                 cartItem.setUserId(userId);
                 cartItem.setChecked(Const.CartChecked.CHECK);
                 cartMapper.insert(cartItem);
-            }else {
+            } else {
+                //cart为空，且count是负数，这种情况直接返回参数错误
                 return ServiceResponse.createByErrorCodeMessage(ResponseCode.ILLEGAL_ARGUMENT.getCode(), ResponseCode.ILLEGAL_ARGUMENT.getDesc());
             }
         } else {
@@ -188,5 +191,33 @@ public class CartServiceImpl implements ICartService {
         } else {
             return false;
         }
+    }
+
+    @Override
+    public ServiceResponse<CartVo> getCart(Integer userId) {
+        List<Cart> cartList = cartMapper.selectCartByUserId(userId);
+        if (cartList.size() == 0){
+            return ServiceResponse.createBySuccessMesage("购物车为空");
+        }else {
+            CartVo cartVo = this.getCartVoLimit(userId, 0);
+            return ServiceResponse.createBySuccess(cartVo);
+        }
+    }
+
+    @Override
+    public ServiceResponse<CartVo> addCart(HttpServletRequest request, HttpServletResponse response, Integer productId, Integer count) {
+        //用户没有登录的情况下，购物车信息存在cookie中
+        if (productId == null || count == null) {
+            return ServiceResponse.createByErrorCodeMessage(ResponseCode.ILLEGAL_ARGUMENT.getCode(), ResponseCode.ILLEGAL_ARGUMENT.getDesc());
+        }
+        //判断传来的productId在数据库中是不是有这个商品
+        Product product = productMapper.selectByPrimaryKey(productId);
+        if (product == null) {
+            return ServiceResponse.createByErrorMessage("没有找到传入商品id的商品");
+        }
+        //TODO 从cookie中取出，查找cookie中是否有这个商品，判段cookie中是否有商品信息
+
+        //TODO cookie中没有，就直接添加到cookie中
+        return null;
     }
 }

@@ -12,6 +12,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
 @Controller
@@ -23,11 +25,21 @@ public class CartController {
 
     @RequestMapping(value = "add_cart.do", method = RequestMethod.GET)
     @ResponseBody
-    public ServiceResponse<CartVo> addCart(HttpSession session, Integer productId, Integer count){
+    public ServiceResponse<CartVo> addCart(HttpServletRequest request, HttpServletResponse response, HttpSession session, Integer productId, Integer count) {
+        User user = ((User) session.getAttribute(Const.CURRENT_USER));
+        if (user == null) {
+            return ServiceResponse.createByErrorCodeMessage(ResponseCode.NEED_LOGIN.getCode(), ResponseCode.NEED_LOGIN.getDesc());
+        }
+        return iCartService.addCart(user.getId(), productId, count);
+    }
+
+    @RequestMapping(value = "get_cart.do", method = RequestMethod.GET)
+    @ResponseBody
+    public ServiceResponse<CartVo> getCart(HttpSession session){
         User user = ((User) session.getAttribute(Const.CURRENT_USER));
         if (user == null){
             return ServiceResponse.createByErrorCodeMessage(ResponseCode.NEED_LOGIN.getCode(), ResponseCode.NEED_LOGIN.getDesc());
         }
-        return iCartService.addCart(user.getId(), productId, count);
+        return iCartService.getCart(user.getId());
     }
 }
