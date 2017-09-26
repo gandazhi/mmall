@@ -31,6 +31,7 @@ public class CartController {
      * @param count     添加或删除的数量
      * @return
      */
+
     @RequestMapping(value = "add_cart.do", method = RequestMethod.GET)
     @ResponseBody
     public ServiceResponse<CartVo> addCart(HttpServletRequest request, HttpServletResponse response, HttpSession session, Integer productId, Integer count) {
@@ -40,6 +41,7 @@ public class CartController {
         }
         return iCartService.addCart(user.getId(), productId, count);
     }
+
 
     /**
      * 获取当前购物车中的信息
@@ -90,6 +92,7 @@ public class CartController {
         return iCartService.checkedOrUnCheckedProduct(user.getId(), null, Const.CartChecked.CHECK); // productId为null则是全选
     }
 
+
     /**
      * 全不选购物车中的所有商品
      *
@@ -139,6 +142,7 @@ public class CartController {
         }
         return iCartService.checkedOrUnCheckedProduct(user.getId(), productId, Const.CartChecked.UN_CHECK);
     }
+
 
     /**
      * 获取购物车中的数量，未登录的时候显示数量为0
