@@ -17,6 +17,17 @@ public class Const {
         Set<String> ORDERBY_ASC_DESC = Sets.newHashSet("price-asc", "price-desc", "create_time-asc", "create_time-desc");
     }
 
+    public interface CartChecked{
+        int CHECK = 1; //1是购物车中勾选状态
+        int UN_CHECK = 0; //0是购物车中未勾选状态
+    }
+
+    public interface LIMT{
+        String LIMIT_NUM_FAIL = "LIMIT_NUM_FAIL";
+        String LIMIT_NUM_SUCCESS = "LIMIT_NUM_SUCCESS";
+        String LIMIT_NUM_DELETE = "LIMIT_NUM_DELETE";
+    }
+
     //七牛云相关区域的信息
     public interface Zone {
         int EAST_CHINA = 1;//七牛云华东 Zone.zone0()
