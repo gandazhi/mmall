@@ -18,4 +18,5 @@ public interface OrderMapper {
 
     Order selectByUserIdOrderNum(@Param(value = "orderNum") Long orderNum, @Param(value = "userId") Integer userId);
 
+    Order selectByOrderNum(Long orderNum);
 }
