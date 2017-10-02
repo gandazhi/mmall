@@ -17,12 +17,12 @@ public class Const {
         Set<String> ORDERBY_ASC_DESC = Sets.newHashSet("price-asc", "price-desc", "create_time-asc", "create_time-desc");
     }
 
-    public interface CartChecked{
+    public interface CartChecked {
         int CHECK = 1; //1是购物车中勾选状态
         int UN_CHECK = 0; //0是购物车中未勾选状态
     }
 
-    public interface LIMT{
+    public interface LIMT {
         String LIMIT_NUM_FAIL = "LIMIT_NUM_FAIL";
         String LIMIT_NUM_SUCCESS = "LIMIT_NUM_SUCCESS";
         String LIMIT_NUM_DELETE = "LIMIT_NUM_DELETE";
@@ -58,6 +58,59 @@ public class Const {
 
         public String getStatus() {
             return status;
+        }
+    }
+
+    public enum OrderStatusEnum {
+        CANCELED(0, "已取消"),
+        NO_PAY(10, "未支付"),
+        PAID(20, "已付款"),
+        SHIPPED(40, "已发货"),
+        ORDER_SUCCESS(50, "订单完成"),
+        ORDER_CLOSE(60, "订单取消");
+
+        OrderStatusEnum(int code, String status) {
+            this.code = code;
+            this.status = status;
+        }
+
+        private int code;
+        private String status;
+
+        public int getCode() {
+            return code;
+        }
+
+        public String getStatus() {
+            return status;
+        }
+    }
+
+    public interface AlipayCallback{
+        String TRADE_STATUS_WAIT_BUYER_PAY = "WAIT_PAY";
+        String TRADE_STATUS_SUCCESS = "TRADE_SUCCESS";
+
+        String RESPONE_SUCCESS = "success";
+        String RESPONE_FAILED = "failed";
+    }
+
+    public enum PayPlatformEnum{
+        ALIPAY(1,"支付宝");
+
+        private int code;
+        private String value;
+
+        PayPlatformEnum(int code, String value) {
+            this.code = code;
+            this.value = value;
+        }
+
+        public int getCode() {
+            return code;
+        }
+
+        public String getValue() {
+            return value;
         }
     }
 
