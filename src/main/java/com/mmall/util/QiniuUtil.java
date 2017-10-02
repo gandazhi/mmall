@@ -45,8 +45,8 @@ public class QiniuUtil {
         try {
             Response response = uploadManager.put(localPath, key ,upToken);
             DefaultPutRet putRet = new Gson().fromJson(response.bodyString(), DefaultPutRet.class);
-            logger.info("七牛云的key"+putRet.key);
-            logger.info("七牛云的hash"+putRet.hash);
+            logger.info("七牛云的key:"+putRet.key);
+            logger.info("七牛云的hash:"+putRet.hash);
             return true;
         } catch (QiniuException e) {
             Response r = e.response;
