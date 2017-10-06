@@ -64,8 +64,9 @@ public class OrderController {
 
         params.remove("sign_type");
         try {
-            boolean alipayRSACheckedV2 = AlipaySignature.rsaCheckV2(params, Configs.getPublicKey(), "utf-8", Configs.getSignType());
+            boolean alipayRSACheckedV2 = AlipaySignature.rsaCheckV2(params, Configs.getAlipayPublicKey(), "utf-8", Configs.getSignType());
             if (!alipayRSACheckedV2){
+                logger.error("非法请求，验证失败");
                 return ServiceResponse.createByErrorMessage("非法请求，验证失败");
             }
         } catch (AlipayApiException e) {
@@ -74,14 +75,16 @@ public class OrderController {
         }
         // TODO 验证各种数据
 
-        ServiceResponse response = iOrderService.aliCallBack(requestParams);
+        logger.info("回调之前.....");
+        ServiceResponse response = iOrderService.aliCallBack(params);
+        logger.info("回调之后.....");
         if (response.isSuccess()){
             return Const.AlipayCallback.RESPONE_SUCCESS;
         }
         return Const.AlipayCallback.RESPONE_FAILED;
     }
 
-    @RequestMapping(value = "queryOrderPayStatus.do")
+    @RequestMapping(value = "queryOrderPayStatus.do", method = RequestMethod.POST)
     @ResponseBody
     public ServiceResponse<Boolean> queryOrderPayStatus(HttpSession session, Long orderNum){
         User user = ((User) session.getAttribute(Const.CURRENT_USER));
