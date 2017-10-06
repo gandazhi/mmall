@@ -33,6 +33,14 @@ public class OrderController {
     @Autowired
     private IOrderService iOrderService;
 
+    /**
+     * 支付宝支付接口
+     *
+     * @param session  通过session判断用户是否登录
+     * @param orderNum 待支付的订单号
+     * @param request  通过HttpServletRequest取得生成支付二维码的位置
+     * @return
+     */
     @RequestMapping(value = "pay.do", method = RequestMethod.POST)
     @ResponseBody
     public ServiceResponse pay(HttpSession session, Long orderNum, HttpServletRequest request) {
@@ -44,6 +52,12 @@ public class OrderController {
         return iOrderService.pay(orderNum, user.getId(), path);
     }
 
+    /**
+     * 支付宝支付的回调接口
+     *
+     * @param request 通过HttpServletRequest取出相应信息做请求验证
+     * @return
+     */
     @RequestMapping(value = "callback.do")
     @ResponseBody
     protected Object alipayCallback(HttpServletRequest request) {
@@ -65,7 +79,7 @@ public class OrderController {
         params.remove("sign_type");
         try {
             boolean alipayRSACheckedV2 = AlipaySignature.rsaCheckV2(params, Configs.getAlipayPublicKey(), "utf-8", Configs.getSignType());
-            if (!alipayRSACheckedV2){
+            if (!alipayRSACheckedV2) {
                 logger.error("非法请求，验证失败");
                 return ServiceResponse.createByErrorMessage("非法请求，验证失败");
             }
@@ -73,28 +87,50 @@ public class OrderController {
             logger.error("支付宝回调异常", e);
             e.printStackTrace();
         }
-        // TODO 验证各种数据
-
         logger.info("回调之前.....");
         ServiceResponse response = iOrderService.aliCallBack(params);
         logger.info("回调之后.....");
-        if (response.isSuccess()){
+        if (response.isSuccess()) {
             return Const.AlipayCallback.RESPONE_SUCCESS;
         }
         return Const.AlipayCallback.RESPONE_FAILED;
     }
 
+    /**
+     * 查询订单支付状态
+     *
+     * @param session  通过session判断用户是否登录
+     * @param orderNum 查询支付状态的订单号
+     * @return
+     */
     @RequestMapping(value = "queryOrderPayStatus.do", method = RequestMethod.POST)
     @ResponseBody
-    public ServiceResponse<Boolean> queryOrderPayStatus(HttpSession session, Long orderNum){
+    public ServiceResponse<Boolean> queryOrderPayStatus(HttpSession session, Long orderNum) {
         User user = ((User) session.getAttribute(Const.CURRENT_USER));
-        if (user == null){
+        if (user == null) {
             return ServiceResponse.createByErrorCodeMessage(ResponseCode.NEED_LOGIN.getCode(), ResponseCode.NEED_LOGIN.getDesc());
         }
         ServiceResponse response = iOrderService.queryOrderPayStatus(user.getId(), orderNum);
-        if (response.isSuccess()){
+        if (response.isSuccess()) {
             return ServiceResponse.createBySuccess(true);
         }
         return ServiceResponse.createBySuccess(false);
+    }
+
+    /**
+     * 创建订单(对购物车中选中的商品下一个订单，对于没有添加商品到购物车中时，直接购买，前端调用的时候先调用添加该商品到购物车中的接口再调用这个接口，后续优化)
+     *
+     * @param session    通过session判断用户是否登录
+     * @param shippingId 登录用户的收货地址id
+     * @return
+     */
+    @RequestMapping(value = "create.do", method = RequestMethod.POST)
+    @ResponseBody
+    public ServiceResponse create(HttpSession session, Integer shippingId) {
+        User user = ((User) session.getAttribute(Const.CURRENT_USER));
+        if (user == null) {
+            return ServiceResponse.createByErrorCodeMessage(ResponseCode.NEED_LOGIN.getCode(), ResponseCode.NEED_LOGIN.getDesc());
+        }
+        return iOrderService.createOrder(user.getId(), shippingId);
     }
 }

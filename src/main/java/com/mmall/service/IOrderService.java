@@ -11,4 +11,6 @@ public interface IOrderService {
     ServiceResponse aliCallBack(Map<String, String> params);
 
     ServiceResponse queryOrderPayStatus(Integer userId, Long orderNum);
+
+    ServiceResponse createOrder(Integer userId, Integer shippingId);
 }
