@@ -22,6 +22,7 @@ import com.mmall.util.DateTimeUtil;
 import com.mmall.util.PropertiesUtil;
 import com.mmall.util.QiniuUtil;
 import com.mmall.vo.OrderItemVo;
+import com.mmall.vo.OrderProductVo;
 import com.mmall.vo.OrderVo;
 import com.mmall.vo.ShippingVo;
 import org.apache.commons.collections.CollectionUtils;
@@ -431,4 +432,54 @@ public class OrderServiceImpl implements IOrderService {
         }
     }
 
+    //取消订单
+    @Override
+    public ServiceResponse<String> cancelOrder(Integer userId, Long orderNum) {
+        if (orderNum == null){
+            return ServiceResponse.createByErrorMessage("订单号不能为空");
+        }
+        Order order = orderMapper.selectByUserIdOrderNum(orderNum, userId);
+        if (order == null){
+            return ServiceResponse.createByErrorMessage("该用户不存在此订单");
+        }
+        if (order.getStatus() != Const.OrderStatusEnum.NO_PAY.getCode()){
+            return ServiceResponse.createByErrorMessage("此订单已经支付，暂时不能退款，请联系管理员");
+        }
+        Order updateOrder = new Order();
+        updateOrder.setId(order.getId());
+        updateOrder.setStatus(Const.OrderStatusEnum.CANCELED.getCode());
+        int resultCount = orderMapper.updateByPrimaryKeySelective(updateOrder);
+        if (resultCount > 0){
+            return ServiceResponse.createBySuccess("取消订单成功");
+        }
+        return ServiceResponse.createByErrorMessage("取消订单失败");
+    }
+
+    @Override
+    public ServiceResponse getCartOrderCartProduct(Integer userId) {
+        OrderProductVo orderProductVo = new OrderProductVo();
+
+        List<Cart> cartList = cartMapper.selectCartByUserIdChecked(userId);
+        if (CollectionUtils.isEmpty(cartList)){
+            return ServiceResponse.createByErrorMessage("购物车为空");
+        }
+
+        ServiceResponse response = this.getCartOrderItem(userId, cartList);
+        if (!response.isSuccess()){
+            return response;
+        }
+        List<OrderItem> orderItemList = ((List<OrderItem>) response.getData());
+
+        List<OrderItemVo> orderItemVoList = Lists.newArrayList();
+        BigDecimal payment = new BigDecimal("0");
+        for (OrderItem orderItem : orderItemList){
+            payment = BigDecimalUtil.add(payment.doubleValue(), orderItem.getTotalPrice().doubleValue());
+            orderItemVoList.add(assembleOrderItemVo(orderItem));
+        }
+
+        orderProductVo.setProductTotalPrice(payment);
+        orderProductVo.setOrderItemVoList(orderItemVoList);
+        orderProductVo.setImageHost(PropertiesUtil.getProperties("qiniu.url"));
+        return ServiceResponse.createBySuccess(orderProductVo);
+    }
 }

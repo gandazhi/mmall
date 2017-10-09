@@ -133,4 +133,32 @@ public class OrderController {
         }
         return iOrderService.createOrder(user.getId(), shippingId);
     }
+
+    /**
+     * 取消订单
+     *
+     * @param session  通过session判断用户是否登录
+     * @param orderNum 待取消的订单号
+     * @return
+     */
+    @RequestMapping(value = "cancel.do", method = RequestMethod.POST)
+    @ResponseBody
+    public ServiceResponse cancel(HttpSession session, Long orderNum) {
+        User user = ((User) session.getAttribute(Const.CURRENT_USER));
+        if (user == null) {
+            return ServiceResponse.createByErrorCodeMessage(ResponseCode.NEED_LOGIN.getCode(), ResponseCode.NEED_LOGIN.getDesc());
+        }
+        return iOrderService.cancelOrder(user.getId(), orderNum);
+    }
+
+    @RequestMapping(value = "getOrderCartProduct.do", method = RequestMethod.POST)
+    @ResponseBody
+    public ServiceResponse getOrderCartProduct(HttpSession session){
+        User user = ((User) session.getAttribute(Const.CURRENT_USER));
+        if (user == null){
+            return ServiceResponse.createByErrorCodeMessage(ResponseCode.NEED_LOGIN.getCode(), ResponseCode.NEED_LOGIN.getDesc());
+        }
+        return iOrderService.getCartOrderCartProduct(user.getId());
+
+    }
 }
