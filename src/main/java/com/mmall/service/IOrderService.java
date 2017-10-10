@@ -1,7 +1,9 @@
 package com.mmall.service;
 
 import com.mmall.common.ServiceResponse;
+import com.mmall.vo.OrderVo;
 
+import java.util.List;
 import java.util.Map;
 
 public interface IOrderService {
@@ -17,4 +19,8 @@ public interface IOrderService {
     ServiceResponse<String> cancelOrder(Integer userId, Long orderNum);
 
     ServiceResponse getCartOrderCartProduct(Integer userId);
+
+    ServiceResponse<OrderVo> orderDetail(Integer userId, Long orderNum);
+
+    ServiceResponse getOrderList(Integer userId, int pageNum, int pageSize);
 }

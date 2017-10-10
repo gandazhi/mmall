@@ -180,11 +180,18 @@
         values
         <foreach collection="orderItemList" index="index" item="item" separator=",">
             (
-              #{item.id}, #{item.orderNo}, #{item.userId}, #{item.productId}, #{item.productName}, #{item.productImage},
+            #{item.id}, #{item.orderNo}, #{item.userId}, #{item.productId}, #{item.productName}, #{item.productImage},
             #{item.currentUnitPrice}, #{item.quantity}, #{item.totalPrice}, now(), now()
             )
         </foreach>
     </insert>
 
+    <select id="selectByOrderAndUserId" resultMap="BaseResultMap" parameterType="map">
+        SELECT
+        <include refid="Base_Column_List"/>
+        FROM mmall_order_item
+        WHERE order_no = #{orderNum}
+        and user_id = #{userId}
+    </select>
 
 </mapper>

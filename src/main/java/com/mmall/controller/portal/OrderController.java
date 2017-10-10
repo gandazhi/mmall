@@ -13,9 +13,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.*;
 import sun.security.krb5.Config;
 
 import javax.servlet.http.HttpServletRequest;
@@ -153,12 +151,49 @@ public class OrderController {
 
     @RequestMapping(value = "getOrderCartProduct.do", method = RequestMethod.POST)
     @ResponseBody
-    public ServiceResponse getOrderCartProduct(HttpSession session){
+    public ServiceResponse getOrderCartProduct(HttpSession session) {
         User user = ((User) session.getAttribute(Const.CURRENT_USER));
-        if (user == null){
+        if (user == null) {
             return ServiceResponse.createByErrorCodeMessage(ResponseCode.NEED_LOGIN.getCode(), ResponseCode.NEED_LOGIN.getDesc());
         }
         return iOrderService.getCartOrderCartProduct(user.getId());
-
     }
+
+    /**
+     * 前台个人中心里获取某个订单的详情
+     *
+     * @param session  判断用户是否登录
+     * @param orderNum 待查看订单详情的订单号
+     * @return
+     */
+    @RequestMapping(value = "orderDetail.do", method = RequestMethod.POST)
+    @ResponseBody
+    public ServiceResponse orderDetail(HttpSession session, Long orderNum) {
+        User user = ((User) session.getAttribute(Const.CURRENT_USER));
+        if (user == null) {
+            return ServiceResponse.createByErrorCodeMessage(ResponseCode.NEED_LOGIN.getCode(), ResponseCode.NEED_LOGIN.getDesc());
+        }
+        return iOrderService.orderDetail(user.getId(), orderNum);
+    }
+
+    /**
+     * 用户前台获取所有的订单列表
+     *
+     * @param session  判断用户是否登录
+     * @param pageNum  分页，显示的当前页数
+     * @param pageSize 分页，每页显示的数量
+     * @return
+     */
+    @RequestMapping(value = "getOrderList.do", method = RequestMethod.GET)
+    @ResponseBody
+    public ServiceResponse getOrderList(HttpSession session,
+                                        @RequestParam(value = "pageNum", defaultValue = "1") int pageNum,
+                                        @RequestParam(value = "pageSize", defaultValue = "10") int pageSize) {
+        User user = ((User) session.getAttribute(Const.CURRENT_USER));
+        if (user == null) {
+            return ServiceResponse.createByErrorCodeMessage(ResponseCode.NEED_LOGIN.getCode(), ResponseCode.NEED_LOGIN.getDesc());
+        }
+        return iOrderService.getOrderList(user.getId(), pageNum, pageSize);
+    }
+
 }

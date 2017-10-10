@@ -10,6 +10,8 @@ import com.alipay.demo.trade.model.result.AlipayF2FPrecreateResult;
 import com.alipay.demo.trade.service.AlipayTradeService;
 import com.alipay.demo.trade.service.impl.AlipayTradeServiceImpl;
 import com.alipay.demo.trade.utils.ZxingUtils;
+import com.github.pagehelper.PageHelper;
+import com.github.pagehelper.PageInfo;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.mmall.common.Const;
@@ -27,6 +29,7 @@ import com.mmall.vo.OrderVo;
 import com.mmall.vo.ShippingVo;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
+import org.aspectj.weaver.ast.Or;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -314,33 +317,33 @@ public class OrderServiceImpl implements IOrderService {
     @Override
     public ServiceResponse createOrder(Integer userId, Integer shippingId) {
         //先判断shippingId是否为空，是否存在这个id
-        if (shippingId == null){
+        if (shippingId == null) {
             return ServiceResponse.createByErrorMessage("shippingId不能为空");
         }
         Shipping shipping = shippingMapper.selectByUserIdShippingId(userId, shippingId);
-        if (shipping == null){
+        if (shipping == null) {
             return ServiceResponse.createByErrorMessage("该用户没有这个shippingId");
         }
         //获取购物车中的商品信息List
         List<Cart> cartList = cartMapper.selectCartByUserIdChecked(userId);
         //将商品信息从购物车中遍历出来
         ServiceResponse response = this.getCartOrderItem(userId, cartList);
-        if (!response.isSuccess()){
+        if (!response.isSuccess()) {
             return response;
         }
         //计算这个订单的总价
         List<OrderItem> orderItemList = ((List<OrderItem>) response.getData());
-        if (CollectionUtils.isEmpty(orderItemList)){
+        if (CollectionUtils.isEmpty(orderItemList)) {
             return ServiceResponse.createByErrorMessage("购物车为空");
         }
         BigDecimal payment = this.getOrderTotalPrice(orderItemList);
         //生成订单
         Order order = this.assembleOrder(userId, shippingId, payment);
-        if (order == null){
+        if (order == null) {
             return ServiceResponse.createByErrorMessage("生成订单失败");
         }
         //在order_item表中设置订单号
-        for (OrderItem orderItem : orderItemList){
+        for (OrderItem orderItem : orderItemList) {
             orderItem.setOrderNo(order.getOrderNo());
         }
         //mybatis批量插入
@@ -354,7 +357,7 @@ public class OrderServiceImpl implements IOrderService {
         return ServiceResponse.createBySuccess(orderVo);
     }
 
-    private OrderVo assembleOrderVo(Order order, List<OrderItem> orderItemList){
+    private OrderVo assembleOrderVo(Order order, List<OrderItem> orderItemList) {
         OrderVo orderVo = new OrderVo();
         orderVo.setOrderNo(order.getOrderNo());
         orderVo.setPayment(order.getPayment());
@@ -366,7 +369,7 @@ public class OrderServiceImpl implements IOrderService {
         orderVo.setShippingId(order.getShippingId());
 
         Shipping shipping = shippingMapper.selectByPrimaryKey(order.getShippingId());
-        if (shipping != null){
+        if (shipping != null) {
             orderVo.setReceiverName(shipping.getReceiverName());
             //组装shippingVo
             orderVo.setShippingVo(assembleShippingVo(shipping));
@@ -380,7 +383,7 @@ public class OrderServiceImpl implements IOrderService {
 
         //组装orderItemVoList
         List<OrderItemVo> orderItemVoList = Lists.newArrayList();
-        for (OrderItem orderItem : orderItemList){
+        for (OrderItem orderItem : orderItemList) {
             OrderItemVo orderItemVo = assembleOrderItemVo(orderItem);
             orderItemVoList.add(orderItemVo);
         }
@@ -390,7 +393,7 @@ public class OrderServiceImpl implements IOrderService {
 
     }
 
-    private OrderItemVo assembleOrderItemVo(OrderItem orderItem){
+    private OrderItemVo assembleOrderItemVo(OrderItem orderItem) {
         OrderItemVo orderItemVo = new OrderItemVo();
         orderItemVo.setOrderNo(orderItem.getOrderNo());
         orderItemVo.setProductId(orderItem.getProductId());
@@ -403,7 +406,7 @@ public class OrderServiceImpl implements IOrderService {
         return orderItemVo;
     }
 
-    private ShippingVo assembleShippingVo(Shipping shipping){
+    private ShippingVo assembleShippingVo(Shipping shipping) {
         ShippingVo shippingVo = new ShippingVo();
         shippingVo.setReceiverName(shipping.getReceiverName());
         shippingVo.setReceiverPhone(shipping.getReceiverPhone());
@@ -417,8 +420,8 @@ public class OrderServiceImpl implements IOrderService {
     }
 
     //减少商品库存
-    private void reduceProductStock(List<OrderItem> orderItemList){
-        for (OrderItem orderItem : orderItemList){
+    private void reduceProductStock(List<OrderItem> orderItemList) {
+        for (OrderItem orderItem : orderItemList) {
             Product product = productMapper.selectByPrimaryKey(orderItem.getProductId());
             product.setStock(product.getStock() - orderItem.getQuantity());
             productMapper.updateByPrimaryKeySelective(product);
@@ -426,8 +429,8 @@ public class OrderServiceImpl implements IOrderService {
     }
 
     //清空购物车信息
-    private void cleanCart(List<Cart> cartList){
-        for (Cart cart : cartList){
+    private void cleanCart(List<Cart> cartList) {
+        for (Cart cart : cartList) {
             cartMapper.deleteByPrimaryKey(cart.getId());
         }
     }
@@ -435,21 +438,21 @@ public class OrderServiceImpl implements IOrderService {
     //取消订单
     @Override
     public ServiceResponse<String> cancelOrder(Integer userId, Long orderNum) {
-        if (orderNum == null){
+        if (orderNum == null) {
             return ServiceResponse.createByErrorMessage("订单号不能为空");
         }
         Order order = orderMapper.selectByUserIdOrderNum(orderNum, userId);
-        if (order == null){
+        if (order == null) {
             return ServiceResponse.createByErrorMessage("该用户不存在此订单");
         }
-        if (order.getStatus() != Const.OrderStatusEnum.NO_PAY.getCode()){
+        if (order.getStatus() != Const.OrderStatusEnum.NO_PAY.getCode()) {
             return ServiceResponse.createByErrorMessage("此订单已经支付，暂时不能退款，请联系管理员");
         }
         Order updateOrder = new Order();
         updateOrder.setId(order.getId());
         updateOrder.setStatus(Const.OrderStatusEnum.CANCELED.getCode());
         int resultCount = orderMapper.updateByPrimaryKeySelective(updateOrder);
-        if (resultCount > 0){
+        if (resultCount > 0) {
             return ServiceResponse.createBySuccess("取消订单成功");
         }
         return ServiceResponse.createByErrorMessage("取消订单失败");
@@ -460,19 +463,19 @@ public class OrderServiceImpl implements IOrderService {
         OrderProductVo orderProductVo = new OrderProductVo();
 
         List<Cart> cartList = cartMapper.selectCartByUserIdChecked(userId);
-        if (CollectionUtils.isEmpty(cartList)){
+        if (CollectionUtils.isEmpty(cartList)) {
             return ServiceResponse.createByErrorMessage("购物车为空");
         }
 
         ServiceResponse response = this.getCartOrderItem(userId, cartList);
-        if (!response.isSuccess()){
+        if (!response.isSuccess()) {
             return response;
         }
         List<OrderItem> orderItemList = ((List<OrderItem>) response.getData());
 
         List<OrderItemVo> orderItemVoList = Lists.newArrayList();
         BigDecimal payment = new BigDecimal("0");
-        for (OrderItem orderItem : orderItemList){
+        for (OrderItem orderItem : orderItemList) {
             payment = BigDecimalUtil.add(payment.doubleValue(), orderItem.getTotalPrice().doubleValue());
             orderItemVoList.add(assembleOrderItemVo(orderItem));
         }
@@ -481,5 +484,51 @@ public class OrderServiceImpl implements IOrderService {
         orderProductVo.setOrderItemVoList(orderItemVoList);
         orderProductVo.setImageHost(PropertiesUtil.getProperties("qiniu.url"));
         return ServiceResponse.createBySuccess(orderProductVo);
+    }
+
+    @Override
+    public ServiceResponse<OrderVo> orderDetail(Integer userId, Long orderNum) {
+        if (orderNum == null) {
+            return ServiceResponse.createByErrorMessage("订单号不能为空");
+        }
+        Order order = orderMapper.selectByUserIdOrderNum(orderNum, userId);
+        if (order != null) {
+            List<OrderItem> orderItemList = orderItemMapper.selectByOrderNumUserId(orderNum, userId);
+            if (CollectionUtils.isEmpty(orderItemList)) {
+                return ServiceResponse.createByErrorMessage("order_item表中没有这个订单");
+            }
+            OrderVo orderVo = assembleOrderVo(order, orderItemList);
+            return ServiceResponse.createBySuccess(orderVo);
+        }
+        return ServiceResponse.createByErrorMessage("该用户没有这个订单");
+    }
+
+    @Override
+    public ServiceResponse getOrderList(Integer userId, int pageNum, int pageSize) {
+        PageHelper.startPage(pageNum, pageSize);
+        List<Order> orderList = orderMapper.selectByUserId(userId);
+        if (CollectionUtils.isEmpty(orderList)) {
+            return ServiceResponse.createBySuccessMesage("该用户还没有订单");
+        }
+        List<OrderVo> orderVoList = assembleOrderVoList(orderList, userId);
+        PageInfo pageResult = new PageInfo(orderList);
+        pageResult.setList(orderVoList);
+        return ServiceResponse.createBySuccess(pageResult);
+    }
+
+    private List<OrderVo> assembleOrderVoList(List<Order> orderList, Integer userId) {
+        List<OrderVo> orderVoList = Lists.newArrayList();
+        for (Order order : orderList) {
+            List<OrderItem> orderItemList = Lists.newArrayList();
+            if (userId == null) {
+                //TODO 没用户id，说明是管理员登录的，查看所有的订单
+            } else {
+                //有用户id，说明是普通用户登录，查看自己的所有订单
+                orderItemList = orderItemMapper.selectByOrderAndUserId(order.getOrderNo(), userId);
+            }
+            OrderVo orderVo = assembleOrderVo(order, orderItemList);
+            orderVoList.add(orderVo);
+        }
+        return orderVoList;
     }
 }
