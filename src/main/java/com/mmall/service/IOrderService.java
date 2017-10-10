@@ -1,5 +1,6 @@
 package com.mmall.service;
 
+import com.github.pagehelper.PageInfo;
 import com.mmall.common.ServiceResponse;
 import com.mmall.vo.OrderVo;
 
@@ -22,5 +23,13 @@ public interface IOrderService {
 
     ServiceResponse<OrderVo> orderDetail(Integer userId, Long orderNum);
 
-    ServiceResponse getOrderList(Integer userId, int pageNum, int pageSize);
+    ServiceResponse<PageInfo> getOrderList(Integer userId, int pageNum, int pageSize);
+
+    ServiceResponse<PageInfo> manageOrderList(int pageNum, int pageSize);
+
+    ServiceResponse<OrderVo> manageOrderDetail(Long orderNum);
+
+    ServiceResponse<PageInfo> searchOrder(String keywords, int pageNum, int pageSize);
+
+    ServiceResponse<String> manageSendGoods(Long orderNum);
 }

@@ -37,10 +37,7 @@ import org.springframework.stereotype.Service;
 
 import java.io.File;
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Random;
+import java.util.*;
 
 @Service("iOrderService")
 public class OrderServiceImpl implements IOrderService {
@@ -504,7 +501,7 @@ public class OrderServiceImpl implements IOrderService {
     }
 
     @Override
-    public ServiceResponse getOrderList(Integer userId, int pageNum, int pageSize) {
+    public ServiceResponse<PageInfo> getOrderList(Integer userId, int pageNum, int pageSize) {
         PageHelper.startPage(pageNum, pageSize);
         List<Order> orderList = orderMapper.selectByUserId(userId);
         if (CollectionUtils.isEmpty(orderList)) {
@@ -521,7 +518,8 @@ public class OrderServiceImpl implements IOrderService {
         for (Order order : orderList) {
             List<OrderItem> orderItemList = Lists.newArrayList();
             if (userId == null) {
-                //TODO 没用户id，说明是管理员登录的，查看所有的订单
+                //没用户id，说明是管理员登录的，查看所有的订单
+                orderItemList = orderItemMapper.selectByOrder(order.getOrderNo());
             } else {
                 //有用户id，说明是普通用户登录，查看自己的所有订单
                 orderItemList = orderItemMapper.selectByOrderAndUserId(order.getOrderNo(), userId);
@@ -530,5 +528,82 @@ public class OrderServiceImpl implements IOrderService {
             orderVoList.add(orderVo);
         }
         return orderVoList;
+    }
+
+    @Override
+    public ServiceResponse<PageInfo> manageOrderList(int pageNum, int pageSize) {
+        PageHelper.startPage(pageNum, pageSize);
+        List<Order> orderList = orderMapper.selectAllOrder();
+        if (CollectionUtils.isEmpty(orderList)) {
+            return ServiceResponse.createBySuccessMesage("现在还没有订单");
+        }
+        List<OrderVo> orderVoList = assembleOrderVoList(orderList, null);//userId传null则是管理员，组装所有orderVoList
+        PageInfo pageResult = new PageInfo(orderList);
+        pageResult.setList(orderVoList);
+        return ServiceResponse.createBySuccess(pageResult);
+    }
+
+    @Override
+    public ServiceResponse<OrderVo> manageOrderDetail(Long orderNum) {
+        if (orderNum == null) {
+            return ServiceResponse.createByErrorMessage("订单号不能为空");
+        }
+        Order order = orderMapper.selectByOrderNum(orderNum);
+        if (order != null) {
+            List<OrderItem> orderItemList = orderItemMapper.selectByOrder(orderNum);
+            if (CollectionUtils.isEmpty(orderItemList)) {
+                return ServiceResponse.createByErrorMessage("order_item表中没有找到这个订单");
+            }
+            OrderVo orderVo = assembleOrderVo(order, orderItemList);
+            return ServiceResponse.createBySuccess(orderVo);
+        }
+        return ServiceResponse.createByErrorMessage("没有找到这个订单");
+    }
+
+    @Override
+    public ServiceResponse<PageInfo> searchOrder(String keywords, int pageNum, int pageSize) {
+        PageHelper.startPage(pageNum, pageSize);
+        if (StringUtils.isBlank(keywords)) {
+            return ServiceResponse.createByErrorMessage("搜索关键字不能为空");
+        }
+        //mybatis模糊匹配，直接把%拼接到关键字上
+        StringBuilder key = new StringBuilder().append("%").append(keywords).append("%");
+        keywords = key.toString();
+        List<Order> orderList = orderMapper.searchByOrderNum(keywords);
+        List<OrderVo> orderVoList = Lists.newArrayList();
+        if (CollectionUtils.isNotEmpty(orderList)) {
+            for (Order order : orderList) {
+                List<OrderItem> orderItemList = orderItemMapper.selectByOrder(order.getOrderNo());
+                OrderVo orderVo = assembleOrderVo(order, orderItemList);
+                orderVoList.add(orderVo);
+            }
+            PageInfo pageResult = new PageInfo(orderList);
+            pageResult.setList(orderVoList);
+            return ServiceResponse.createBySuccess(pageResult);
+        }
+        return ServiceResponse.createBySuccessMesage("没有找到与关键字" + keywords + "相关的订单");
+    }
+
+    @Override
+    public ServiceResponse<String> manageSendGoods(Long orderNum) {
+        if (orderNum == null) {
+            return ServiceResponse.createByErrorMessage("订单号不能为空");
+        }
+        Order order = orderMapper.selectByOrderNum(orderNum);
+        if (order == null) {
+            return ServiceResponse.createByErrorMessage("没有找个这个订单");
+        }
+        if (order.getStatus() == Const.OrderStatusEnum.PAID.getCode()) {
+            order.setStatus(Const.OrderStatusEnum.SHIPPED.getCode());
+            order.setSendTime(new Date());
+            int resultCount = orderMapper.updateByPrimaryKeySelective(order);
+            if (resultCount > 0) {
+                return ServiceResponse.createBySuccessMesage("发货成功");
+            } else {
+                return ServiceResponse.createByErrorMessage("发货失败");
+            }
+        } else {
+            return ServiceResponse.createByErrorMessage("当前状态不是已支付，不允许发货");
+        }
     }
 }
