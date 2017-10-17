@@ -74,34 +74,34 @@ public class UserServiceImpl implements IUserService {
     public ServiceResponse<String> checkValid(String str, String type) {
         if (org.apache.commons.lang3.StringUtils.isNotBlank(str)) { //判断str是否为空
             //开始校验用户名或邮箱是否存在User
-            if (Const.USERNAME.equals(type)) {
-                int resultCount = userMapper.checkUsername(str);
-                if (resultCount > 0) {
-                    return ServiceResponse.createByErrorMessage("用户名已经存在");
-                }
-            } else if (Const.EMAIL.equals(type)) {
-                if (!RegularExpressionUtil.isEmail(str)) {
-                    return ServiceResponse.createByErrorMessage("邮箱不合法");
-                }
+            switch (type) {
+                case Const.USERNAME:
+                    int resultCount = userMapper.checkUsername(str);
+                    if (resultCount > 0) {
+                        return ServiceResponse.createByErrorMessage("用户名已经存在");
+                    }
+                    break;
+                case Const.EMAIL:
+                    if (!RegularExpressionUtil.isEmail(str)) {
+                        return ServiceResponse.createByErrorMessage("邮箱不合法");
+                    }
+                    resultCount = userMapper.checkEmail(str);
+                    if (resultCount > 0) {
+                        return ServiceResponse.createByErrorMessage("邮箱已经存在");
+                    }
+                    break;
+                case Const.PHONE:
+                    if (!RegularExpressionUtil.isPhone(str)) {
+                        return ServiceResponse.createByErrorMessage("手机号不合法");
+                    }
+                    resultCount = userMapper.checkPhone(str);
+                    if (resultCount > 0) {
+                        return ServiceResponse.createByErrorMessage("这个手机号已经被注册了");
+                    }
+                    break;
+                default:
+                    return ServiceResponse.createByErrorMessage("参数错误");
             }
-            else if (Const.EMAIL.equals(type)) {
-                int resultCount = userMapper.checkEmail(str);
-                if (resultCount > 0) {
-                    return ServiceResponse.createByErrorMessage("邮箱已经存在");
-                }
-            } else if (Const.PHONE.equals(type)) {
-                if (!RegularExpressionUtil.isPhone(str)) {
-                    return ServiceResponse.createByErrorMessage("手机号不合法");
-                }
-                int resultCount = userMapper.checkPhone(str);
-                if (resultCount > 0) {
-                    return ServiceResponse.createByErrorMessage("这个手机号已经被注册了");
-                }
-            }else {
-                return ServiceResponse.createByErrorMessage("type错误");
-            }
-        } else {
-            return ServiceResponse.createByErrorMessage("参数错误");
         }
         return ServiceResponse.createBySuccessMesage("校验成功");
     }
@@ -109,7 +109,7 @@ public class UserServiceImpl implements IUserService {
     @Override
     public ServiceResponse selectQuestion(String username) {
         //判断username是不是为空
-        if (StringUtils.isBlank(username)){
+        if (StringUtils.isBlank(username)) {
             return ServiceResponse.createByErrorMessage("username不能为空");
         }
         //先校验传来的username是否存在
@@ -126,7 +126,7 @@ public class UserServiceImpl implements IUserService {
 
     @Override
     public ServiceResponse<String> checkAnswer(String username, String question, String answer) {
-        if (StringUtils.isBlank(username) || StringUtils.isBlank(question) || StringUtils.isBlank(answer)){
+        if (StringUtils.isBlank(username) || StringUtils.isBlank(question) || StringUtils.isBlank(answer)) {
             return ServiceResponse.createByErrorMessage("参数不能为空");
         }
         int resultCount = userMapper.checkAnswer(username, question, answer);
@@ -169,13 +169,13 @@ public class UserServiceImpl implements IUserService {
         if (resultCount == 0) {
             return ServiceResponse.createByErrorMessage("旧密码错误");
         }
-        if (oldPassword == newPassword){
+        if (oldPassword == newPassword) {
             return ServiceResponse.createByErrorMessage("新密码不能与旧密码一致");
         }
         user.setPassword(MD5Util.MD5EncodeUtf8(newPassword));
         resultCount = userMapper.updateByPrimaryKeySelective(user);
         if (resultCount > 0) {
-           return ServiceResponse.createBySuccessMesage("密码修改成功");
+            return ServiceResponse.createBySuccessMesage("密码修改成功");
         }
         return ServiceResponse.createByErrorMessage("密码修改失败");
     }
@@ -184,7 +184,7 @@ public class UserServiceImpl implements IUserService {
     public ServiceResponse<User> updateInformation(User user) {
 
         //判断邮箱是否合法
-        if (!RegularExpressionUtil.isEmail(user.getEmail())){
+        if (!RegularExpressionUtil.isEmail(user.getEmail())) {
             return ServiceResponse.createByErrorMessage("邮箱不合法");
         }
         //判断email是不是被其他用户占用了
@@ -194,12 +194,12 @@ public class UserServiceImpl implements IUserService {
         }
 
         //判断手机号是否合法
-        if (!RegularExpressionUtil.isPhone(user.getPhone())){
+        if (!RegularExpressionUtil.isPhone(user.getPhone())) {
             return ServiceResponse.createByErrorMessage("手机号不合法");
         }
         //判断手机号是否被别人注册了
         resultCount = userMapper.checkPhone(user.getPhone());
-        if (resultCount > 0){
+        if (resultCount > 0) {
             return ServiceResponse.createByErrorMessage("该手机号已经被其他人注册了，请更换手机号");
         }
 
