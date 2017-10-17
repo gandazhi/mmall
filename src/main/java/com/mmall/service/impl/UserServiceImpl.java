@@ -80,6 +80,9 @@ public class UserServiceImpl implements IUserService {
                     if (resultCount > 0) {
                         return ServiceResponse.createByErrorMessage("用户名已经存在");
                     }
+                    if (str.getBytes().length != str.length()){
+                        return ServiceResponse.createByErrorMessage("用户名不合法");
+                    }
                     break;
                 case Const.EMAIL:
                     if (!RegularExpressionUtil.isEmail(str)) {
