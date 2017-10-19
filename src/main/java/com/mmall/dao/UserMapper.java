@@ -35,4 +35,5 @@ public interface UserMapper {
     int checkEmailByUserId(@Param("userId") Integer userId, @Param("email") String email);
 
     int checkPhone(String phone);
+
 }

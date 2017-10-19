@@ -7,6 +7,7 @@ import com.mmall.dao.UserMapper;
 import com.mmall.pojo.User;
 import com.mmall.service.IUserService;
 import com.mmall.util.MD5Util;
+import com.mmall.util.ObjUtil;
 import com.mmall.util.RegularExpressionUtil;
 
 import org.apache.commons.lang3.StringUtils;
@@ -80,7 +81,7 @@ public class UserServiceImpl implements IUserService {
                     if (resultCount > 0) {
                         return ServiceResponse.createByErrorMessage("用户名已经存在");
                     }
-                    if (str.getBytes().length != str.length()){
+                    if (str.getBytes().length != str.length()) {
                         return ServiceResponse.createByErrorMessage("用户名不合法");
                     }
                     break;
@@ -185,39 +186,57 @@ public class UserServiceImpl implements IUserService {
 
     @Override
     public ServiceResponse<User> updateInformation(User user) {
+        /**
+         * 判断传来的user里的email，phone，username,question,answer是不是有值
+         * 没值就是不更新这个字段
+         * 不允许更新username
+         */
+        User updateUser = new User();
+        updateUser.setId(user.getId());
 
         //判断邮箱是否合法
-        if (!RegularExpressionUtil.isEmail(user.getEmail())) {
-            return ServiceResponse.createByErrorMessage("邮箱不合法");
-        }
-        //判断email是不是被其他用户占用了
-        int resultCount = userMapper.checkEmailByUserId(user.getId(), user.getEmail());
-        if (resultCount > 0) {
-            return ServiceResponse.createByErrorMessage("该email已经被其他人注册了，请更换邮箱");
+        if (StringUtils.isNotBlank(user.getEmail())) {
+            if (!RegularExpressionUtil.isEmail(user.getEmail())) {
+                return ServiceResponse.createByErrorMessage("邮箱不合法");
+            }
+            //判断email是不是被其他用户占用了
+            int resultCount = userMapper.checkEmailByUserId(user.getId(), user.getEmail());
+            if (resultCount > 0) {
+                return ServiceResponse.createByErrorMessage("该email已经被其他人注册了，请更换邮箱");
+            }
+            updateUser.setEmail(user.getEmail());
         }
 
         //判断手机号是否合法
-        if (!RegularExpressionUtil.isPhone(user.getPhone())) {
-            return ServiceResponse.createByErrorMessage("手机号不合法");
-        }
-        //判断手机号是否被别人注册了
-        resultCount = userMapper.checkPhone(user.getPhone());
-        if (resultCount > 0) {
-            return ServiceResponse.createByErrorMessage("该手机号已经被其他人注册了，请更换手机号");
+        if (StringUtils.isNotBlank(user.getPhone())) {
+            if (!RegularExpressionUtil.isPhone(user.getPhone())) {
+                return ServiceResponse.createByErrorMessage("手机号不合法");
+            }
+            //判断手机号是否被别人注册了
+            int resultCount = userMapper.checkPhone(user.getPhone());
+            if (resultCount > 0) {
+                return ServiceResponse.createByErrorMessage("该手机号已经被其他人注册了，请更换手机号");
+            }
+            updateUser.setPhone(user.getPhone());
         }
 
-        User updateUser = new User();
-        updateUser.setUsername(user.getUsername());
-        updateUser.setEmail(user.getEmail());
-        updateUser.setQuestion(user.getQuestion());
-        updateUser.setAnswer(user.getAnswer());
-        updateUser.setPhone(user.getPhone());
-
-        resultCount = userMapper.updateByPrimaryKeySelective(updateUser);
-        if (resultCount > 0) {
-            return ServiceResponse.createBySuccess("更新信息成功", updateUser);
+        if (StringUtils.isNotBlank(user.getQuestion())) {
+            updateUser.setQuestion(user.getQuestion());
         }
-        return ServiceResponse.createByErrorMessage("更新信息失败");
+        if (StringUtils.isNotBlank(user.getAnswer())) {
+            updateUser.setAnswer(user.getAnswer());
+        }
+
+        if (updateUser.getPhone() != null || updateUser.getEmail() != null ||
+                updateUser.getPhone() != null || updateUser.getQuestion() != null || updateUser.getAnswer() != null) {
+            int resultCount = userMapper.updateByPrimaryKeySelective(updateUser);
+            if (resultCount > 0) {
+                return ServiceResponse.createBySuccess("更新信息成功", updateUser);
+            }
+            return ServiceResponse.createByErrorMessage("更新信息失败");
+        } else {
+            return ServiceResponse.createByErrorMessage("参数错误");
+        }
     }
 
     @Override
