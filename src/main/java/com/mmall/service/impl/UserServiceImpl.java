@@ -232,7 +232,7 @@ public class UserServiceImpl implements IUserService {
                 updateUser.getPhone() != null || updateUser.getQuestion() != null || updateUser.getAnswer() != null) {
             int resultCount = userMapper.updateByPrimaryKeySelective(updateUser);
             if (resultCount > 0) {
-                return ServiceResponse.createBySuccess("更新信息成功", updateUser);
+                return this.getInformation(user.getId());
             }
             return ServiceResponse.createByErrorMessage("更新信息失败");
         } else {
