@@ -204,5 +204,10 @@
     WHERE phone = #{phone}
   </select>
 
+  <select id="checkPhoneByUserId" resultType="int" parameterType="map">
+    SELECT COUNT(1) FROM mmall_user
+    WHERE phone = #{phone}
+    and id != #{userId}
+  </select>
 
 </mapper>
