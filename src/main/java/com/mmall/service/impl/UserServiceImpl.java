@@ -234,7 +234,6 @@ public class UserServiceImpl implements IUserService {
         }
         updateUser.setAnswer(user.getAnswer());
 
-
         resultCount = userMapper.updateByPrimaryKeySelective(updateUser);
         if (resultCount > 0) {
             return this.getInformation(user.getId());
