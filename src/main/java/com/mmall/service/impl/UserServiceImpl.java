@@ -196,48 +196,50 @@ public class UserServiceImpl implements IUserService {
         updateUser.setId(user.getId());
 
         //判断邮箱是否合法
-        if (StringUtils.isNotBlank(user.getEmail())) {
-            if (!RegularExpressionUtil.isEmail(user.getEmail())) {
-                return ServiceResponse.createByErrorMessage("邮箱不合法");
-            }
-            //判断email是不是被其他用户占用了
-            int resultCount = userMapper.checkEmailByUserId(user.getId(), user.getEmail());
-            if (resultCount > 0) {
-                return ServiceResponse.createByErrorMessage("该email已经被其他人注册了，请更换邮箱");
-            }
-            updateUser.setEmail(user.getEmail());
+        if (StringUtils.isBlank(user.getEmail())) {
+            return ServiceResponse.createByErrorMessage("邮箱不能为空");
         }
+        if (!RegularExpressionUtil.isEmail(user.getEmail())) {
+            return ServiceResponse.createByErrorMessage("邮箱不合法");
+        }
+        //判断email是不是被其他用户占用了
+        int resultCount = userMapper.checkEmailByUserId(user.getId(), user.getEmail());
+        if (resultCount > 0) {
+            return ServiceResponse.createByErrorMessage("该email已经被其他人注册了，请更换邮箱");
+        }
+        updateUser.setEmail(user.getEmail());
+
 
         //判断手机号是否合法
-        if (StringUtils.isNotBlank(user.getPhone())) {
-            if (!RegularExpressionUtil.isPhone(user.getPhone())) {
-                return ServiceResponse.createByErrorMessage("手机号不合法");
-            }
-            //判断手机号是否被别人注册了
-            int resultCount = userMapper.checkPhone(user.getPhone());
-            if (resultCount > 0) {
-                return ServiceResponse.createByErrorMessage("该手机号已经被其他人注册了，请更换手机号");
-            }
-            updateUser.setPhone(user.getPhone());
+        if (StringUtils.isBlank(user.getPhone())) {
+            return ServiceResponse.createByErrorMessage("手机号不能为空");
         }
+        if (!RegularExpressionUtil.isPhone(user.getPhone())) {
+            return ServiceResponse.createByErrorMessage("手机号不合法");
+        }
+        //判断手机号是否被别人注册了
+        resultCount = userMapper.checkPhoneByUserId(user.getId(), user.getPhone());
+        if (resultCount > 0) {
+            return ServiceResponse.createByErrorMessage("该手机号已经被其他人注册了，请更换手机号");
+        }
+        updateUser.setPhone(user.getPhone());
 
-        if (StringUtils.isNotBlank(user.getQuestion())) {
-            updateUser.setQuestion(user.getQuestion());
+        if (StringUtils.isBlank(user.getQuestion())) {
+            return ServiceResponse.createByErrorMessage("重置密码问题不能为空");
         }
-        if (StringUtils.isNotBlank(user.getAnswer())) {
-            updateUser.setAnswer(user.getAnswer());
-        }
+        updateUser.setQuestion(user.getQuestion());
 
-        if (updateUser.getPhone() != null || updateUser.getEmail() != null ||
-                updateUser.getPhone() != null || updateUser.getQuestion() != null || updateUser.getAnswer() != null) {
-            int resultCount = userMapper.updateByPrimaryKeySelective(updateUser);
-            if (resultCount > 0) {
-                return this.getInformation(user.getId());
-            }
-            return ServiceResponse.createByErrorMessage("更新信息失败");
-        } else {
-            return ServiceResponse.createByErrorMessage("参数错误");
+        if (StringUtils.isBlank(user.getAnswer())) {
+            return ServiceResponse.createByErrorMessage("重置密码答案不能为空");
         }
+        updateUser.setAnswer(user.getAnswer());
+
+
+        resultCount = userMapper.updateByPrimaryKeySelective(updateUser);
+        if (resultCount > 0) {
+            return this.getInformation(user.getId());
+        }
+        return ServiceResponse.createByErrorMessage("更新信息失败");
     }
 
     @Override
