@@ -174,7 +174,7 @@ public class UserServiceImpl implements IUserService {
         if (resultCount == 0) {
             return ServiceResponse.createByErrorMessage("旧密码错误");
         }
-        if (oldPassword == newPassword) {
+        if (oldPassword.equals(newPassword)) {
             return ServiceResponse.createByErrorMessage("新密码不能与旧密码一致");
         }
         user.setPassword(MD5Util.MD5EncodeUtf8(newPassword));
