@@ -29,3 +29,4 @@ target/
 Thumbs.db
 
 src/main/java/com/mmall/util/Test.java
+src/main/resources/mybatis-generator-core-1.3.2.jar
