@@ -28,7 +28,9 @@ public class Product {
 
     private Date updateTime;
 
-    public Product(Integer id, Integer categoryId, String name, String subtitle, String mainImage, String subImages, String detail, BigDecimal price, Integer stock, Integer status, Date createTime, Date updateTime) {
+    private Integer salesVolume;
+
+    public Product(Integer id, Integer categoryId, String name, String subtitle, String mainImage, String subImages, String detail, BigDecimal price, Integer stock, Integer status, Date createTime, Date updateTime, Integer salesVolume) {
         this.id = id;
         this.categoryId = categoryId;
         this.name = name;
@@ -41,6 +43,7 @@ public class Product {
         this.status = status;
         this.createTime = createTime;
         this.updateTime = updateTime;
+        this.salesVolume = salesVolume;
     }
 
     public Product() {
@@ -141,5 +144,13 @@ public class Product {
 
     public void setUpdateTime(Date updateTime) {
         this.updateTime = updateTime;
+    }
+
+    public Integer getSalesVolume() {
+        return salesVolume;
+    }
+
+    public void setSalesVolume(Integer salesVolume) {
+        this.salesVolume = salesVolume;
     }
 }

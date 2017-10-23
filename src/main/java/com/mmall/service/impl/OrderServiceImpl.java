@@ -347,6 +347,8 @@ public class OrderServiceImpl implements IOrderService {
         orderItemMapper.batchInsert(orderItemList);
         //减少商品库存
         this.reduceProductStock(orderItemList);
+        //增加商品销量
+        this.addSalesVoluem(orderItemList);
         //清空留在购物车中购买商品的信息
         this.cleanCart(cartList);
         //给前端返回VO对象等...
@@ -422,6 +424,13 @@ public class OrderServiceImpl implements IOrderService {
             Product product = productMapper.selectByPrimaryKey(orderItem.getProductId());
             product.setStock(product.getStock() - orderItem.getQuantity());
             productMapper.updateByPrimaryKeySelective(product);
+        }
+    }
+
+    //增加商品销量
+    private void addSalesVoluem(List<OrderItem> orderItemList) {
+        for (OrderItem orderItem : orderItemList) {
+            productMapper.updateSalesVolumeByProductId(orderItem.getProductId(), orderItem.getQuantity());
         }
     }
 

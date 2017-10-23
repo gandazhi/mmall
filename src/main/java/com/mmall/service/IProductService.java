@@ -2,8 +2,8 @@ package com.mmall.service;
 
 import com.github.pagehelper.PageInfo;
 import com.mmall.common.ServiceResponse;
-import com.mmall.pojo.Product;
 import com.mmall.vo.ProductDetailVo;
+import com.mmall.pojo.Product;
 
 public interface IProductService {
 
