@@ -234,4 +234,12 @@
         SET sales_volume = sales_volume + #{quantity}
         WHERE id = #{productId}
     </update>
+  
+  <select id="selectIdByCategoryId" resultMap="BaseResultMap" parameterType="int">
+    SELECT <include refid="Base_Column_List"/>
+    FROM mmall_product
+    WHERE category_id = #{categoryId}
+    ORDER BY sales_volume DESC
+    LIMIT #{num}
+  </select>
 </mapper>
