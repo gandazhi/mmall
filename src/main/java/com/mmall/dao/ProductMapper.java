@@ -29,4 +29,6 @@ public interface ProductMapper {
     List<Product> selectUserList();
 
     int updateSalesVolumeByProductId(@Param(value = "productId")Integer productId, @Param(value = "quantity")Integer quantity);
+
+    List<Product> selectIdByCategoryId(@Param(value = "categoryId") Integer categoryId, @Param(value = "num") Integer num);
 }
