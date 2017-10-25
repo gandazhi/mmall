@@ -25,4 +25,6 @@ public interface IUserService {
 
     ServiceResponse checkAdminRole(User user);
 
+    ServiceResponse userViewHistory(Integer userId, Integer productId);
+
 }
