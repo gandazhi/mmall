@@ -23,6 +23,7 @@ public class RecommendServiceImpl implements IRecommendService {
     @Autowired
     private UserHistoryMapper userHistoryMapper;
 
+
     @Override
     public ServiceResponse productRecommend(Integer userId, Integer categoryId, Integer num) {
         if (userId == 0) {
@@ -34,11 +35,11 @@ public class RecommendServiceImpl implements IRecommendService {
             if (CollectionUtils.isEmpty(userHistoryList)) {
                 //该用户在这个分类下没有记录，按分类下的销量来排
                 return this.salesOrder(categoryId, num);
-            }else {
+            } else {
                 //分类下有记录，按分类下的浏览量来排
                 List<Product> productList = Lists.newArrayList();
                 //从userHistory中获取productId，组装productList
-                for (UserHistory userHistory : userHistoryList){
+                for (UserHistory userHistory : userHistoryList) {
                     Product product = productMapper.selectByPrimaryKey(userHistory.getProductId());
                     productList.add(product);
                 }
@@ -49,7 +50,7 @@ public class RecommendServiceImpl implements IRecommendService {
     }
 
     //按照分类下的销量来排序
-    private ServiceResponse salesOrder(Integer categoryId, Integer num){
+    private ServiceResponse salesOrder(Integer categoryId, Integer num) {
         List<Product> productList = productMapper.selectIdByCategoryId(categoryId, num); // order by sales_volume desc
         if (CollectionUtils.isEmpty(productList)) {
             return ServiceResponse.createByErrorMessage("没有找到与" + categoryId + "相关的商品");
@@ -60,7 +61,7 @@ public class RecommendServiceImpl implements IRecommendService {
     }
 
     //组装ProductListVo
-    private List<ProductListVo> assembleProductListVo(List<Product> productList){
+    private List<ProductListVo> assembleProductListVo(List<Product> productList) {
         List<ProductListVo> productListVoList = Lists.newArrayList();
         for (Product productItem : productList) {
             ProductListVo productListVo = new ProductListVo();
@@ -75,6 +76,7 @@ public class RecommendServiceImpl implements IRecommendService {
             productListVoList.add(productListVo);
         }
         return productListVoList;
+
     }
 
 }

@@ -21,12 +21,12 @@ public class HomePageController {
 
     @RequestMapping(value = "getProductRecommend.do", method = RequestMethod.GET)
     @ResponseBody
-    public ServiceResponse getProductRecommend(HttpSession session,Integer categoryId, Integer num){
+    public ServiceResponse getProductRecommend(HttpSession session, Integer categoryId, Integer num) {
         User user = ((User) session.getAttribute(Const.CURRENT_USER));
-        if (user == null){
+        if (user == null) {
             //用户没有登录，按对应楼层的categoryId进行推荐
             return iRecommendService.productRecommend(0, categoryId, num);
-        }else {
+        } else {
             //用户登录，对应楼层的categoryId按照用户浏览记录和搜索记录进行推荐
             return iRecommendService.productRecommend(user.getId(), categoryId, num);
         }
