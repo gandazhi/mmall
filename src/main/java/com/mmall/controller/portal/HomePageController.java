@@ -28,7 +28,7 @@ public class HomePageController {
             return iRecommendService.productRecommend(0, categoryId, num);
         }else {
             //用户登录，对应楼层的categoryId按照用户浏览记录和搜索记录进行推荐
-            return ServiceResponse.createByErrorMessage("还没有完成");
+            return iRecommendService.productRecommend(user.getId(), categoryId, num);
         }
     }
 }

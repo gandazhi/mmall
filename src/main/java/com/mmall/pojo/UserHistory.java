@@ -5,13 +5,16 @@ public class UserHistory {
 
     private Integer userId;
 
+    private Integer categoryId;
+
     private Integer productId;
 
     private Integer quantity;
 
-    public UserHistory(Integer id, Integer userId, Integer productId, Integer quantity) {
+    public UserHistory(Integer id, Integer userId, Integer categoryId, Integer productId, Integer quantity) {
         this.id = id;
         this.userId = userId;
+        this.categoryId = categoryId;
         this.productId = productId;
         this.quantity = quantity;
     }
@@ -34,6 +37,14 @@ public class UserHistory {
 
     public void setUserId(Integer userId) {
         this.userId = userId;
+    }
+
+    public Integer getCategoryId() {
+        return categoryId;
+    }
+
+    public void setCategoryId(Integer categoryId) {
+        this.categoryId = categoryId;
     }
 
     public Integer getProductId() {

@@ -272,8 +272,8 @@ public class UserServiceImpl implements IUserService {
         if (productId == null) {
             return ServiceResponse.createByErrorMessage("productId不能为空");
         }
-        int productNum = productMapper.selectProductById(productId);
-        if (productNum == 0) {
+        Product product = productMapper.selectByPrimaryKey(productId);
+        if (product == null) {
             return ServiceResponse.createByErrorMessage("没有找到与" + productId + "相关的商品");
         }
         //先查找该用户是否浏览过该商品，如果有记录，就在这条数据上加一，如果没有，就创建一条数据
@@ -282,6 +282,7 @@ public class UserServiceImpl implements IUserService {
             //没有这条记录，新建一条数据
             userHistory = new UserHistory();
             userHistory.setUserId(userId);
+            userHistory.setCategoryId(product.getCategoryId());
             userHistory.setProductId(productId);
             userHistory.setQuantity(1);
             userHistoryMapper.insertSelective(userHistory);
