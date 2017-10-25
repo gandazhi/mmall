@@ -194,4 +194,20 @@ public class UserController {
         }
         return iUserService.getInformation(currentUser.getId());
     }
+
+    /**
+     *
+     * @param session
+     * @param productId
+     * @return
+     */
+    @RequestMapping(value = "userViewHistory.do", method = RequestMethod.GET)
+    @ResponseBody
+    public ServiceResponse userViewHistory(HttpSession session, Integer productId){
+        User user = ((User) session.getAttribute(Const.CURRENT_USER));
+        if (user == null){
+            return ServiceResponse.createByErrorCodeMessage(ResponseCode.NEED_LOGIN.getCode(), ResponseCode.NEED_LOGIN.getDesc());
+        }
+        return iUserService.userViewHistory(user.getId(), productId);
+    }
 }

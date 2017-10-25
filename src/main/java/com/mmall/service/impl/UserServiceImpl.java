@@ -3,8 +3,12 @@ package com.mmall.service.impl;
 import com.mmall.common.Const;
 import com.mmall.common.ServiceResponse;
 import com.mmall.common.TokenCache;
+import com.mmall.dao.ProductMapper;
+import com.mmall.dao.UserHistoryMapper;
 import com.mmall.dao.UserMapper;
+import com.mmall.pojo.Product;
 import com.mmall.pojo.User;
+import com.mmall.pojo.UserHistory;
 import com.mmall.service.IUserService;
 import com.mmall.util.MD5Util;
 import com.mmall.util.ObjUtil;
@@ -21,6 +25,10 @@ public class UserServiceImpl implements IUserService {
 
     @Autowired
     private UserMapper userMapper;
+    @Autowired
+    private ProductMapper productMapper;
+    @Autowired
+    private UserHistoryMapper userHistoryMapper;
 
 
     @Override
@@ -257,5 +265,32 @@ public class UserServiceImpl implements IUserService {
             return ServiceResponse.createBySuccess();
         }
         return ServiceResponse.createByError();
+    }
+
+    @Override
+    public ServiceResponse userViewHistory(Integer userId, Integer productId) {
+        if (productId == null) {
+            return ServiceResponse.createByErrorMessage("productId不能为空");
+        }
+        int productNum = productMapper.selectProductById(productId);
+        if (productNum == 0) {
+            return ServiceResponse.createByErrorMessage("没有找到与" + productId + "相关的商品");
+        }
+        //先查找该用户是否浏览过该商品，如果有记录，就在这条数据上加一，如果没有，就创建一条数据
+        UserHistory userHistory = userHistoryMapper.selectUserViewHistoryByUserIdProductId(userId, productId);
+        if (userHistory == null) {
+            //没有这条记录，新建一条数据
+            userHistory = new UserHistory();
+            userHistory.setUserId(userId);
+            userHistory.setProductId(productId);
+            userHistory.setQuantity(1);
+            userHistoryMapper.insertSelective(userHistory);
+        } else {
+            //有这条数据，浏览记录加一
+            userHistory.setQuantity(userHistory.getQuantity() + 1);
+            userHistoryMapper.updateByPrimaryKeySelective(userHistory);
+
+        }
+        return ServiceResponse.createBySuccessMesage("用户浏览记录增加成功");
     }
 }
