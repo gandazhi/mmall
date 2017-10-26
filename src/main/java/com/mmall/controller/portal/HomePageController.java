@@ -19,6 +19,14 @@ public class HomePageController {
     @Autowired
     private RecommendServiceImpl iRecommendService;
 
+    /**
+     * 用户首页推荐产品接口
+     *
+     * @param session    判断用户是否登录
+     * @param categoryId 推荐的类别id
+     * @param num        推荐的数量
+     * @return
+     */
     @RequestMapping(value = "getProductRecommend.do", method = RequestMethod.GET)
     @ResponseBody
     public ServiceResponse getProductRecommend(HttpSession session, Integer categoryId, Integer num) {

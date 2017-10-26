@@ -14,7 +14,7 @@ public class Const {
     public static final String PHONE = "phone";
 
     public interface ProductListOrderBy {
-        Set<String> ORDERBY_ASC_DESC = Sets.newHashSet("price-asc", "price-desc", "create_time-asc", "create_time-desc");
+        Set<String> ORDERBY_ASC_DESC = Sets.newHashSet("price-asc", "price-desc", "create_time-asc", "create_time-desc", "sales_volume-desc");
     }
 
     public interface CartChecked {
@@ -85,9 +85,9 @@ public class Const {
             return status;
         }
 
-        public static OrderStatusEnum codeOf(int code){
-            for (OrderStatusEnum orderStatusEnum : values()){
-                if (orderStatusEnum.getCode() == code){
+        public static OrderStatusEnum codeOf(int code) {
+            for (OrderStatusEnum orderStatusEnum : values()) {
+                if (orderStatusEnum.getCode() == code) {
                     return orderStatusEnum;
                 }
             }
@@ -141,9 +141,9 @@ public class Const {
             return value;
         }
 
-        public static PaymentTypeEnum codeOf(int code){
-            for (PaymentTypeEnum paymentTypeEnum : values()){
-                if (paymentTypeEnum.getCode() == code){
+        public static PaymentTypeEnum codeOf(int code) {
+            for (PaymentTypeEnum paymentTypeEnum : values()) {
+                if (paymentTypeEnum.getCode() == code) {
                     return paymentTypeEnum;
                 }
             }
