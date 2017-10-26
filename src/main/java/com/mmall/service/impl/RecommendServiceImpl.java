@@ -26,6 +26,9 @@ public class RecommendServiceImpl implements IRecommendService {
 
     @Override
     public ServiceResponse productRecommend(Integer userId, Integer categoryId, Integer num) {
+        if (num == null){
+            return ServiceResponse.createByErrorMessage("num不能为空");
+        }
         if (userId == 0) {
             //userId为0，则是用户没有登录，按照类别下的销量来推荐
             return this.salesOrder(categoryId, num);
