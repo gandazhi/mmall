@@ -101,6 +101,12 @@
         <table tableName="mmall_user_history" domainObjectName="UserHistory" enableCountByExample="false" enableUpdateByExample="false"
                enableDeleteByExample="false" enableSelectByExample="false" selectByExampleQueryId="false"></table>
 
+        <table tableName="mmall_seckill" domainObjectName="Seckill" enableCountByExample="false" enableUpdateByExample="false"
+               enableDeleteByExample="false" enableSelectByExample="false" selectByExampleQueryId="false"></table>
+
+        <table tableName="mmall_success_killed" domainObjectName="SuccessKilled" enableCountByExample="false" enableUpdateByExample="false"
+               enableDeleteByExample="false" enableSelectByExample="false" selectByExampleQueryId="false"></table>
+
 
         <!-- geelynote mybatis插件的搭建 -->
     </context>
