@@ -196,6 +196,7 @@ public class UserController {
     }
 
     /**
+     * 增加用户浏览记录
      *
      * @param session
      * @param productId
@@ -203,9 +204,9 @@ public class UserController {
      */
     @RequestMapping(value = "userViewHistory.do", method = RequestMethod.GET)
     @ResponseBody
-    public ServiceResponse userViewHistory(HttpSession session, Integer productId){
+    public ServiceResponse userViewHistory(HttpSession session, Integer productId) {
         User user = ((User) session.getAttribute(Const.CURRENT_USER));
-        if (user == null){
+        if (user == null) {
             return ServiceResponse.createByErrorCodeMessage(ResponseCode.NEED_LOGIN.getCode(), ResponseCode.NEED_LOGIN.getDesc());
         }
         return iUserService.userViewHistory(user.getId(), productId);
