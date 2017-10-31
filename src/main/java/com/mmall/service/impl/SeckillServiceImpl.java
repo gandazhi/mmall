@@ -7,6 +7,7 @@ import com.mmall.common.ServiceResponse;
 import com.mmall.dao.SeckillMapper;
 import com.mmall.pojo.Seckill;
 import com.mmall.service.ISeckillService;
+import com.mmall.util.PropertiesUtil;
 import com.mmall.vo.SeckillVo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -44,6 +45,7 @@ public class SeckillServiceImpl implements ISeckillService{
             seckill.setMainImage(seckillItem.getMainImage());
             seckill.setPrice(seckillItem.getPrice());
             seckill.setSeckillPrice(seckillItem.getSeckillPrice());
+            seckill.setImageHost(PropertiesUtil.getProperties("qiniu.url","http://owioow1ef.bkt.clouddn.com/"));
             seckillVoList.add(seckill);
         }
         return seckillVoList;

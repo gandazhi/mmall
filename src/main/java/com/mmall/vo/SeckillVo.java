@@ -9,6 +9,8 @@ public class SeckillVo {
     private BigDecimal price;
     private BigDecimal seckillPrice;
 
+    private String imageHost;
+
     public String getName() {
         return name;
     }
@@ -47,5 +49,13 @@ public class SeckillVo {
 
     public void setSeckillPrice(BigDecimal seckillPrice) {
         this.seckillPrice = seckillPrice;
+    }
+
+    public String getImageHost() {
+        return imageHost;
+    }
+
+    public void setImageHost(String imageHost) {
+        this.imageHost = imageHost;
     }
 }

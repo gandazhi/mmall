@@ -1,0 +1,20 @@
+package com.mmall.dao;
+
+import com.mmall.pojo.Seckill;
+import com.mmall.pojo.SeckillWithBLOBs;
+
+public interface SeckillMapper {
+    int deleteByPrimaryKey(Long seckillId);
+
+    int insert(SeckillWithBLOBs record);
+
+    int insertSelective(SeckillWithBLOBs record);
+
+    SeckillWithBLOBs selectByPrimaryKey(Long seckillId);
+
+    int updateByPrimaryKeySelective(SeckillWithBLOBs record);
+
+    int updateByPrimaryKeyWithBLOBs(SeckillWithBLOBs record);
+
+    int updateByPrimaryKey(Seckill record);
+}
