@@ -15,7 +15,7 @@
     seckill_id, name, number, create_time, start_time, end_time
   </sql>
   <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Long" >
-    select 
+    select
     <include refid="Base_Column_List" />
     from mmall_seckill
     where seckill_id = #{seckillId,jdbcType=BIGINT}
@@ -25,10 +25,10 @@
     where seckill_id = #{seckillId,jdbcType=BIGINT}
   </delete>
   <insert id="insert" parameterType="com.mmall.pojo.Seckill" >
-    insert into mmall_seckill (seckill_id, name, number, 
+    insert into mmall_seckill (seckill_id, name, number,
       create_time, start_time, end_time
       )
-    values (#{seckillId,jdbcType=BIGINT}, #{name,jdbcType=VARCHAR}, #{number,jdbcType=INTEGER}, 
+    values (#{seckillId,jdbcType=BIGINT}, #{name,jdbcType=VARCHAR}, #{number,jdbcType=INTEGER},
       #{createTime,jdbcType=TIMESTAMP}, #{startTime,jdbcType=TIMESTAMP}, #{endTime,jdbcType=TIMESTAMP}
       )
   </insert>

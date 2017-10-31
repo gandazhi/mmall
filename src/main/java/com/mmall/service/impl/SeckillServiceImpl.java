@@ -7,7 +7,7 @@ import com.mmall.common.ServiceResponse;
 import com.mmall.dao.SeckillMapper;
 import com.mmall.pojo.Seckill;
 import com.mmall.service.ISeckillService;
-import com.mmall.vo.seckillVo;
+import com.mmall.vo.SeckillVo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
@@ -28,19 +28,22 @@ public class SeckillServiceImpl implements ISeckillService{
             return ServiceResponse.createByErrorMessage("在数据库中没有找到秒杀数据....");
         }
         //组装seckillVoList
-        List<seckillVo> seckillVoList = assembleSeckillVo(seckillList);
+        List<SeckillVo> seckillVoList = assembleSeckillVo(seckillList);
 
         PageInfo pageResult = new PageInfo(seckillList);
         pageResult.setList(seckillVoList);
         return ServiceResponse.createBySuccess(pageResult);
     }
 
-    private List<seckillVo> assembleSeckillVo(List<Seckill> seckillList){
-        List<seckillVo> seckillVoList = Lists.newArrayList();
+    private List<SeckillVo> assembleSeckillVo(List<Seckill> seckillList){
+        List<SeckillVo> seckillVoList = Lists.newArrayList();
         for (Seckill seckillItem : seckillList){
-            seckillVo seckill = new seckillVo();
+            SeckillVo seckill = new SeckillVo();
             seckill.setName(seckillItem.getName());
             seckill.setNumber(seckillItem.getNumber());
+            seckill.setMainImage(seckillItem.getMainImage());
+            seckill.setPrice(seckillItem.getPrice());
+            seckill.setSeckillPrice(seckillItem.getSeckillPrice());
             seckillVoList.add(seckill);
         }
         return seckillVoList;

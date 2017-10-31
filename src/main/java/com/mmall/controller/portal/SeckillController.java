@@ -2,7 +2,7 @@ package com.mmall.controller.portal;
 
 import com.mmall.common.ServiceResponse;
 import com.mmall.service.ISeckillService;
-import com.mmall.vo.seckillVo;
+import com.mmall.vo.SeckillVo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -27,7 +27,7 @@ public class SeckillController {
      */
     @RequestMapping(value = "getSeckillList.do", method = RequestMethod.GET)
     @ResponseBody
-    public ServiceResponse<List<seckillVo>> getSeckillList(@RequestParam(value = "pageNum", defaultValue = "1") int pageNum,
+    public ServiceResponse<List<SeckillVo>> getSeckillList(@RequestParam(value = "pageNum", defaultValue = "1") int pageNum,
                                                            @RequestParam(value = "pageSize", defaultValue = "10") int pageSize) {
         return iSeckillService.getSeckillList(pageNum, pageSize);
     }
