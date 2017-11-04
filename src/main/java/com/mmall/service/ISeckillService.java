@@ -5,4 +5,6 @@ import com.mmall.common.ServiceResponse;
 public interface ISeckillService {
 
     ServiceResponse getSeckillList(int pageNum, int PageSize);
+
+    ServiceResponse getSeckillDetail(Integer seckillProductId);
 }

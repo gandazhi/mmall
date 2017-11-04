@@ -2,15 +2,14 @@ package com.mmall.vo;
 
 import java.math.BigDecimal;
 
-public class SeckillVo {
-    private Long id;
+public class SeckillDetailVo {
     private String name;
-    private int number;
     private String mainImage;
+    private String subImage;
+    private String detail;
     private BigDecimal price;
     private BigDecimal seckillPrice;
-
-    private String imageHost;
+    private Integer number;
 
     public String getName() {
         return name;
@@ -20,20 +19,28 @@ public class SeckillVo {
         this.name = name;
     }
 
-    public int getNumber() {
-        return number;
-    }
-
-    public void setNumber(int number) {
-        this.number = number;
-    }
-
     public String getMainImage() {
         return mainImage;
     }
 
     public void setMainImage(String mainImage) {
         this.mainImage = mainImage;
+    }
+
+    public String getSubImage() {
+        return subImage;
+    }
+
+    public void setSubImage(String subImage) {
+        this.subImage = subImage;
+    }
+
+    public String getDetail() {
+        return detail;
+    }
+
+    public void setDetail(String detail) {
+        this.detail = detail;
     }
 
     public BigDecimal getPrice() {
@@ -52,19 +59,11 @@ public class SeckillVo {
         this.seckillPrice = seckillPrice;
     }
 
-    public String getImageHost() {
-        return imageHost;
+    public Integer getNumber() {
+        return number;
     }
 
-    public void setImageHost(String imageHost) {
-        this.imageHost = imageHost;
-    }
-
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
+    public void setNumber(Integer number) {
+        this.number = number;
     }
 }

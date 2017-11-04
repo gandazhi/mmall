@@ -40,6 +40,7 @@ public class SeckillServiceImpl implements ISeckillService{
         List<SeckillVo> seckillVoList = Lists.newArrayList();
         for (Seckill seckillItem : seckillList){
             SeckillVo seckill = new SeckillVo();
+            seckill.setId(seckillItem.getSeckillId());
             seckill.setName(seckillItem.getName());
             seckill.setNumber(seckillItem.getNumber());
             seckill.setMainImage(seckillItem.getMainImage());
@@ -49,5 +50,13 @@ public class SeckillServiceImpl implements ISeckillService{
             seckillVoList.add(seckill);
         }
         return seckillVoList;
+    }
+
+    @Override
+    public ServiceResponse getSeckillDetail(Integer seckillProductId) {
+        if (seckillProductId == null){
+            return ServiceResponse.createByErrorMessage("seckillProductId参数错误");
+        }
+        return null;
     }
 }
